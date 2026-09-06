@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "config": {
+    "target_name_or_path": "Qwen/Qwen3-8B",
+    "draft_name_or_path": "Qwen3-8B-DSpark-5L-block7",
+    "tasks": [
+      [
+        "gsm8k",
+        1
+      ]
+    ],
+    "max_samples": 1,
+    "dataset_root": "<DeepSpec>/eval_datasets",
+    "max_new_tokens": 32,
+    "temperature": 0.0,
+    "confidence_threshold": 0.0,
+    "proposal_length": null,
+    "draft_depth": null,
+    "seed": 980406,
+    "tensorboard_dir": null,
+    "step": null,
+    "trace_output": "trace",
+    "output_json": "result.json"
+  },
+  "architecture": "Qwen3DSparkModel",
+  "metrics": [
+    {
+      "dataset": "gsm8k",
+      "num_samples": 1,
+      "draft_tokens_per_proposal": 7.0,
+      "acceptance_length": 5.571428571428571,
+      "verify_rate": 0.6964285714285714,
+      "accept_rates_by_position": [
+        0.8571428571428571,
+        0.7142857142857143,
+        0.7142857142857143,
+        0.7142857142857143,
+        0.5714285714285714,
+        0.5714285714285714,
+        0.42857142857142855
+      ],
+      "proposal_count": 7,
+      "acceptance_length_sum": 39,
+      "proposal_length_sum": 49,
+      "proposals_at_pos": [
+        7,
+        7,
+        7,
+        7,
+        7,
+        7,
+        7
+      ],
+      "accepted_at_pos": [
+        6,
+        5,
+        5,
+        5,
+        4,
+        4,
+        3
+      ]
+    }
+  ],
+  "timing": {
+    "model_load_seconds": 7.999818876385689,
+    "evaluation_seconds": 2.490006372332573
+  },
+  "trace_prefix": "trace",
+  "rank0_trace": "trace.rank0.jsonl",
+  "mode": "measured_gpu_offline_smoke",
+  "benchmark_claim": false,
+  "environment": {
+    "python": "3.12.13",
+    "torch": "2.11.0+cu129",
+    "torch_cuda": "12.9",
+    "transformers": "5.14.1",
+    "gpu": "Quadro RTX 8000",
+    "gpu_index": "1",
+    "driver": "560.35.03",
+    "deepspec_source": {
+      "commit": "005e03b81cec38b7da6399833d609ee89a2587f2",
+      "dirty": false
+    }
+  },
+  "limitations": [
+    "One-sample correctness and trace smoke test; not a speedup benchmark.",
+    "Evaluation time includes only this tiny workload and is not statistically stable.",
+    "The trace reports draft proposal time, not end-to-end per-round latency."
+  ]
+}

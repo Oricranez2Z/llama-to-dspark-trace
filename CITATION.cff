@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use this educational project, please cite the repository."
+title: "LLM Serving Lab"
+type: software
+version: 0.1.0
+date-released: 2026-09-06
+authors:
+  - name: "Oricrane"
+license: MIT

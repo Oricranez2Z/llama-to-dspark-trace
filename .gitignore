@@ -1,0 +1,25 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.coverage
+.pytest_cache/
+.ruff_cache/
+.venv/
+dist/
+build/
+
+# Generated experiment artifacts. Curated samples under results are tracked.
+results/generated/
+*.jsonl.tmp
+
+# Large model and profiling artifacts.
+*.bin
+*.safetensors
+*.pt
+*.pth
+*.ncu-rep
+*.nsys-rep
+
+.idea/
+.vscode/
+.DS_Store

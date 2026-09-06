@@ -1,0 +1,78 @@
+{
+  "disclaimer": "Algorithmic simulation only; target_forward_calls are conceptual verification rounds, not measured GPU kernel launches.",
+  "baseline_target_steps": 24,
+  "results": [
+    {
+      "method": "fixed",
+      "draft_length": 1,
+      "matches_autoregressive": true,
+      "target_forward_calls": 13,
+      "proposed_tokens": 13,
+      "accepted_tokens": 11,
+      "mean_accepted_length": 0.8461538461538461
+    },
+    {
+      "method": "fixed",
+      "draft_length": 2,
+      "matches_autoregressive": true,
+      "target_forward_calls": 10,
+      "proposed_tokens": 20,
+      "accepted_tokens": 14,
+      "mean_accepted_length": 1.4
+    },
+    {
+      "method": "fixed",
+      "draft_length": 4,
+      "matches_autoregressive": true,
+      "target_forward_calls": 9,
+      "proposed_tokens": 32,
+      "accepted_tokens": 16,
+      "mean_accepted_length": 1.7777777777777777
+    },
+    {
+      "method": "fixed",
+      "draft_length": 8,
+      "matches_autoregressive": true,
+      "target_forward_calls": 8,
+      "proposed_tokens": 54,
+      "accepted_tokens": 17,
+      "mean_accepted_length": 2.125
+    },
+    {
+      "method": "confidence",
+      "concurrency": 1,
+      "matches_autoregressive": true,
+      "target_forward_calls": 7,
+      "proposed_tokens": 40,
+      "accepted_tokens": 17,
+      "mean_accepted_length": 2.4285714285714284
+    },
+    {
+      "method": "confidence",
+      "concurrency": 4,
+      "matches_autoregressive": true,
+      "target_forward_calls": 5,
+      "proposed_tokens": 24,
+      "accepted_tokens": 20,
+      "mean_accepted_length": 4.0
+    },
+    {
+      "method": "confidence",
+      "concurrency": 8,
+      "matches_autoregressive": true,
+      "target_forward_calls": 5,
+      "proposed_tokens": 24,
+      "accepted_tokens": 20,
+      "mean_accepted_length": 4.0
+    },
+    {
+      "method": "confidence",
+      "concurrency": 16,
+      "matches_autoregressive": true,
+      "target_forward_calls": 8,
+      "proposed_tokens": 24,
+      "accepted_tokens": 16,
+      "mean_accepted_length": 2.0
+    }
+  ]
+}

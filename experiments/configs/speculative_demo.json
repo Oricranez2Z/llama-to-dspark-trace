@@ -1,0 +1,8 @@
+{
+  "prompt_token_ids": [1, 4, 9],
+  "max_new_tokens": 24,
+  "draft_lengths": [1, 2, 4, 8],
+  "error_every": 5,
+  "confidences": [0.97, 0.93, 0.88, 0.81, 0.70, 0.58, 0.44, 0.31],
+  "concurrency_levels": [1, 4, 8, 16]
+}

@@ -1,0 +1,121 @@
+[
+  {
+    "request_id": "1",
+    "prompt": "Explain KV cache in one sentence.",
+    "prompt_token_ids": [
+      840,
+      20772,
+      84648,
+      6500,
+      304,
+      825,
+      11652,
+      13
+    ],
+    "outputs": [
+      {
+        "index": 0,
+        "text": " KV cache is a technique used in transformer models to store the keys and values of",
+        "token_ids": [
+          84648,
+          6500,
+          374,
+          264,
+          14762,
+          1483,
+          304,
+          42578,
+          4119,
+          311,
+          3553,
+          279,
+          6894,
+          323,
+          2750,
+          315
+        ],
+        "finish_reason": "length"
+      }
+    ]
+  },
+  {
+    "request_id": "2",
+    "prompt": "Why does continuous batching improve GPU utilization?",
+    "prompt_token_ids": [
+      10234,
+      1558,
+      19259,
+      84256,
+      7269,
+      22670,
+      49449,
+      30
+    ],
+    "outputs": [
+      {
+        "index": 0,
+        "text": " I'm trying to understand the concept of continuous batching in the context of deep learning",
+        "token_ids": [
+          358,
+          2776,
+          4460,
+          311,
+          3535,
+          279,
+          7286,
+          315,
+          19259,
+          84256,
+          304,
+          279,
+          2266,
+          315,
+          5538,
+          6832
+        ],
+        "finish_reason": "length"
+      }
+    ]
+  },
+  {
+    "request_id": "3",
+    "prompt": "Describe prefill and decode in two short sentences.",
+    "prompt_token_ids": [
+      74785,
+      855,
+      7559,
+      323,
+      16895,
+      304,
+      1378,
+      2805,
+      22870,
+      13
+    ],
+    "outputs": [
+      {
+        "index": 0,
+        "text": " Also, describe the difference between the two. Prefill and decode are two stages",
+        "token_ids": [
+          7281,
+          11,
+          7512,
+          279,
+          6672,
+          1948,
+          279,
+          1378,
+          13,
+          42588,
+          483,
+          323,
+          16895,
+          525,
+          1378,
+          17628
+        ],
+        "finish_reason": "length"
+      }
+    ]
+  }
+]

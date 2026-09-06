@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "mode": "measured_gpu_offline_batch_smoke",
+  "benchmark_claim": false,
+  "model": "Qwen/Qwen3-8B@b968826",
+  "sampling": {
+    "temperature": 0,
+    "max_tokens": 16,
+    "seed": 7
+  },
+  "workload": {
+    "request_count": 3,
+    "input_tokens": 26,
+    "output_tokens": 48
+  },
+  "timing": {
+    "engine_init_seconds": 18.69264837913215,
+    "measured_batch_seconds": 0.46469277143478394,
+    "output_tokens_per_second": 103.29405351366958
+  },
+  "environment": {
+    "gpu": "Quadro RTX 8000",
+    "gpu_memory_bytes": 50756386816,
+    "driver": "560.35.03",
+    "python": "3.12.13",
+    "torch": "2.11.0+cu129",
+    "torch_cuda": "12.9",
+    "vllm": "0.23.1.dev0+g0fc695fc6.d20260806",
+    "vllm_source": {
+      "commit": "0fc695fc6d1d82e9a5ac6835ac8e4e1c83703665",
+      "dirty": true
+    }
+  },
+  "artifacts": {
+    "trace": "trace.jsonl",
+    "outputs": "outputs.json"
+  },
+  "limitations": [
+    "Small offline batch; this is not an online serving benchmark.",
+    "No TTFT, TPOT percentile, or concurrency sweep is reported.",
+    "enforce_eager=True favors source tracing over peak performance."
+  ]
+}

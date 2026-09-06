@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="706" height="246" viewBox="0 0 706 246">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<style>text{font-family:ui-monospace,monospace;font-size:12px}.title{font-family:system-ui,sans-serif;font-size:18px;font-weight:700}</style>
+<text class="title" x="20" y="28">Request scheduling timeline</text>
+<text x="108" y="48">step 0</text>
+<line x1="100" y1="55" x2="100" y2="201" stroke="#e5e7eb"/>
+<text x="172" y="48">step 1</text>
+<line x1="164" y1="55" x2="164" y2="201" stroke="#e5e7eb"/>
+<text x="236" y="48">step 2</text>
+<line x1="228" y1="55" x2="228" y2="201" stroke="#e5e7eb"/>
+<text x="300" y="48">step 3</text>
+<line x1="292" y1="55" x2="292" y2="201" stroke="#e5e7eb"/>
+<text x="364" y="48">step 4</text>
+<line x1="356" y1="55" x2="356" y2="201" stroke="#e5e7eb"/>
+<text x="428" y="48">step 5</text>
+<line x1="420" y1="55" x2="420" y2="201" stroke="#e5e7eb"/>
+<text x="492" y="48">step 6</text>
+<line x1="484" y1="55" x2="484" y2="201" stroke="#e5e7eb"/>
+<text x="556" y="48">step 7</text>
+<line x1="548" y1="55" x2="548" y2="201" stroke="#e5e7eb"/>
+<text x="620" y="48">step 8</text>
+<line x1="612" y1="55" x2="612" y2="201" stroke="#e5e7eb"/>
+<text x="20" y="80">A</text>
+<line x1="100" y1="97" x2="686" y2="97" stroke="#f0f0f0"/>
+<rect x="104" y="61" width="56" height="28" rx="5" fill="#4C78A8"/>
+<text x="112" y="80" fill="white">P:3</text>
+<rect x="168" y="61" width="56" height="28" rx="5" fill="#F58518"/>
+<text x="176" y="80" fill="white">D:1</text>
+<rect x="232" y="61" width="56" height="28" rx="5" fill="#F58518"/>
+<text x="240" y="80" fill="white">D:1</text>
+<rect x="296" y="61" width="56" height="28" rx="5" fill="#F58518"/>
+<text x="304" y="80" fill="white">D:1</text>
+<rect x="360" y="61" width="56" height="28" rx="5" fill="#F58518"/>
+<text x="368" y="80" fill="white">D:1</text>
+<text x="20" y="122">B</text>
+<line x1="100" y1="139" x2="686" y2="139" stroke="#f0f0f0"/>
+<rect x="104" y="103" width="56" height="28" rx="5" fill="#4C78A8"/>
+<text x="112" y="122" fill="white">P:7</text>
+<rect x="168" y="103" width="56" height="28" rx="5" fill="#4C78A8"/>
+<text x="176" y="122" fill="white">P:6</text>
+<rect x="232" y="103" width="56" height="28" rx="5" fill="#F58518"/>
+<text x="240" y="122" fill="white">D:1</text>
+<rect x="296" y="103" width="56" height="28" rx="5" fill="#F58518"/>
+<text x="304" y="122" fill="white">D:1</text>
+<text x="20" y="164">C</text>
+<line x1="100" y1="181" x2="686" y2="181" stroke="#f0f0f0"/>
+<rect x="168" y="145" width="56" height="28" rx="5" fill="#4C78A8"/>
+<text x="176" y="164" fill="white">P:3</text>
+<rect x="232" y="145" width="56" height="28" rx="5" fill="#4C78A8"/>
+<text x="240" y="164" fill="white">P:2</text>
+<rect x="296" y="145" width="56" height="28" rx="5" fill="#F58518"/>
+<text x="304" y="164" fill="white">D:1</text>
+<rect x="360" y="145" width="56" height="28" rx="5" fill="#F58518"/>
+<text x="368" y="164" fill="white">D:1</text>
+<rect x="424" y="145" width="56" height="28" rx="5" fill="#F58518"/>
+<text x="432" y="164" fill="white">D:1</text>
+<rect x="488" y="145" width="56" height="28" rx="5" fill="#F58518"/>
+<text x="496" y="164" fill="white">D:1</text>
+<rect x="552" y="145" width="56" height="28" rx="5" fill="#F58518"/>
+<text x="560" y="164" fill="white">D:1</text>
+<rect x="616" y="145" width="56" height="28" rx="5" fill="#F58518"/>
+<text x="624" y="164" fill="white">D:1</text>
+<rect x="100" y="214" width="14" height="14" fill="#4C78A8"/>
+<text x="120" y="226">prefill</text>
+<rect x="200" y="214" width="14" height="14" fill="#F58518"/>
+<text x="220" y="226">decode</text>
+</svg>

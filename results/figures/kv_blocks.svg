@@ -1,0 +1,141 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="518" viewBox="0 0 720 518">
+<rect width="100%" height="100%" fill="white"/>
+<style>text{font-family:ui-monospace,monospace;font-size:11px}.title{font-family:system-ui,sans-serif;font-size:18px;font-weight:700}</style>
+<text class="title" x="20" y="28">Physical KV block ownership</text>
+<text x="117" y="57">0</text>
+<text x="153" y="57">1</text>
+<text x="189" y="57">2</text>
+<text x="225" y="57">3</text>
+<text x="261" y="57">4</text>
+<text x="297" y="57">5</text>
+<text x="333" y="57">6</text>
+<text x="369" y="57">7</text>
+<text x="405" y="57">8</text>
+<text x="20" y="91">step 0</text>
+<rect x="110" y="68" width="30" height="30" rx="4" fill="#4C78A8" stroke="#d1d5db"/>
+<text x="119" y="88" fill="white">A</text>
+<rect x="146" y="68" width="30" height="30" rx="4" fill="#F58518" stroke="#d1d5db"/>
+<text x="155" y="88" fill="white">B</text>
+<rect x="182" y="68" width="30" height="30" rx="4" fill="#F58518" stroke="#d1d5db"/>
+<text x="191" y="88" fill="white">B</text>
+<rect x="218" y="68" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="254" y="68" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="290" y="68" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="326" y="68" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="362" y="68" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="398" y="68" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<text x="20" y="133">step 1</text>
+<rect x="110" y="110" width="30" height="30" rx="4" fill="#4C78A8" stroke="#d1d5db"/>
+<text x="119" y="130" fill="white">A</text>
+<rect x="146" y="110" width="30" height="30" rx="4" fill="#F58518" stroke="#d1d5db"/>
+<text x="155" y="130" fill="white">B</text>
+<rect x="182" y="110" width="30" height="30" rx="4" fill="#F58518" stroke="#d1d5db"/>
+<text x="191" y="130" fill="white">B</text>
+<rect x="218" y="110" width="30" height="30" rx="4" fill="#F58518" stroke="#d1d5db"/>
+<text x="227" y="130" fill="white">B</text>
+<rect x="254" y="110" width="30" height="30" rx="4" fill="#F58518" stroke="#d1d5db"/>
+<text x="263" y="130" fill="white">B</text>
+<rect x="290" y="110" width="30" height="30" rx="4" fill="#54A24B" stroke="#d1d5db"/>
+<text x="299" y="130" fill="white">C</text>
+<rect x="326" y="110" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="362" y="110" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="398" y="110" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<text x="20" y="175">step 2</text>
+<rect x="110" y="152" width="30" height="30" rx="4" fill="#4C78A8" stroke="#d1d5db"/>
+<text x="119" y="172" fill="white">A</text>
+<rect x="146" y="152" width="30" height="30" rx="4" fill="#F58518" stroke="#d1d5db"/>
+<text x="155" y="172" fill="white">B</text>
+<rect x="182" y="152" width="30" height="30" rx="4" fill="#F58518" stroke="#d1d5db"/>
+<text x="191" y="172" fill="white">B</text>
+<rect x="218" y="152" width="30" height="30" rx="4" fill="#F58518" stroke="#d1d5db"/>
+<text x="227" y="172" fill="white">B</text>
+<rect x="254" y="152" width="30" height="30" rx="4" fill="#F58518" stroke="#d1d5db"/>
+<text x="263" y="172" fill="white">B</text>
+<rect x="290" y="152" width="30" height="30" rx="4" fill="#54A24B" stroke="#d1d5db"/>
+<text x="299" y="172" fill="white">C</text>
+<rect x="326" y="152" width="30" height="30" rx="4" fill="#4C78A8" stroke="#d1d5db"/>
+<text x="335" y="172" fill="white">A</text>
+<rect x="362" y="152" width="30" height="30" rx="4" fill="#54A24B" stroke="#d1d5db"/>
+<text x="371" y="172" fill="white">C</text>
+<rect x="398" y="152" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<text x="20" y="217">step 3</text>
+<rect x="110" y="194" width="30" height="30" rx="4" fill="#4C78A8" stroke="#d1d5db"/>
+<text x="119" y="214" fill="white">A</text>
+<rect x="146" y="194" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="182" y="194" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="218" y="194" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="254" y="194" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="290" y="194" width="30" height="30" rx="4" fill="#54A24B" stroke="#d1d5db"/>
+<text x="299" y="214" fill="white">C</text>
+<rect x="326" y="194" width="30" height="30" rx="4" fill="#4C78A8" stroke="#d1d5db"/>
+<text x="335" y="214" fill="white">A</text>
+<rect x="362" y="194" width="30" height="30" rx="4" fill="#54A24B" stroke="#d1d5db"/>
+<text x="371" y="214" fill="white">C</text>
+<rect x="398" y="194" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<text x="20" y="259">step 4</text>
+<rect x="110" y="236" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="146" y="236" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="182" y="236" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="218" y="236" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="254" y="236" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="290" y="236" width="30" height="30" rx="4" fill="#54A24B" stroke="#d1d5db"/>
+<text x="299" y="256" fill="white">C</text>
+<rect x="326" y="236" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="362" y="236" width="30" height="30" rx="4" fill="#54A24B" stroke="#d1d5db"/>
+<text x="371" y="256" fill="white">C</text>
+<rect x="398" y="236" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<text x="20" y="301">step 5</text>
+<rect x="110" y="278" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="146" y="278" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="182" y="278" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="218" y="278" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="254" y="278" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="290" y="278" width="30" height="30" rx="4" fill="#54A24B" stroke="#d1d5db"/>
+<text x="299" y="298" fill="white">C</text>
+<rect x="326" y="278" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="362" y="278" width="30" height="30" rx="4" fill="#54A24B" stroke="#d1d5db"/>
+<text x="371" y="298" fill="white">C</text>
+<rect x="398" y="278" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<text x="20" y="343">step 6</text>
+<rect x="110" y="320" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="146" y="320" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="182" y="320" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="218" y="320" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="254" y="320" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="290" y="320" width="30" height="30" rx="4" fill="#54A24B" stroke="#d1d5db"/>
+<text x="299" y="340" fill="white">C</text>
+<rect x="326" y="320" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="362" y="320" width="30" height="30" rx="4" fill="#54A24B" stroke="#d1d5db"/>
+<text x="371" y="340" fill="white">C</text>
+<rect x="398" y="320" width="30" height="30" rx="4" fill="#54A24B" stroke="#d1d5db"/>
+<text x="407" y="340" fill="white">C</text>
+<text x="20" y="385">step 7</text>
+<rect x="110" y="362" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="146" y="362" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="182" y="362" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="218" y="362" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="254" y="362" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="290" y="362" width="30" height="30" rx="4" fill="#54A24B" stroke="#d1d5db"/>
+<text x="299" y="382" fill="white">C</text>
+<rect x="326" y="362" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="362" y="362" width="30" height="30" rx="4" fill="#54A24B" stroke="#d1d5db"/>
+<text x="371" y="382" fill="white">C</text>
+<rect x="398" y="362" width="30" height="30" rx="4" fill="#54A24B" stroke="#d1d5db"/>
+<text x="407" y="382" fill="white">C</text>
+<text x="20" y="427">step 8</text>
+<rect x="110" y="404" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="146" y="404" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="182" y="404" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="218" y="404" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="254" y="404" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="290" y="404" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="326" y="404" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="362" y="404" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="398" y="404" width="30" height="30" rx="4" fill="#F3F4F6" stroke="#d1d5db"/>
+<rect x="110" y="484" width="14" height="14" fill="#4C78A8"/>
+<text x="130" y="496">A</text>
+<rect x="205" y="484" width="14" height="14" fill="#F58518"/>
+<text x="225" y="496">B</text>
+<rect x="300" y="484" width="14" height="14" fill="#54A24B"/>
+<text x="320" y="496">C</text>
+</svg>
