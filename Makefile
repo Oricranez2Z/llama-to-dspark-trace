@@ -1,4 +1,4 @@
-.PHONY: setup test lint demo demo-spec visualize visualize-measured samples clean
+.PHONY: setup test lint demo demo-spec demo-dflare compare-dflare visualize visualize-measured samples clean
 
 setup:
 	uv sync --extra dev
@@ -18,6 +18,21 @@ demo-spec:
 	uv run python experiments/run_spec_decode_benchmark.py \
 		--config experiments/configs/speculative_demo.json \
 		--output results/generated/speculative_summary.json
+
+demo-dflare:
+	uv run python experiments/run_dflare_educational.py \
+		--output results/generated/dflare_educational.json \
+		--trace results/generated/dflare_educational_trace.jsonl
+
+compare-dflare:
+	uv run python experiments/compare_dflare_results.py \
+		--angelslim-result results/measured/ar_dflash_dflare_rtx8000_fp16_mixed4/result.json \
+		--vllm-ar-outputs results/measured/vllm_ar_rtx8000_fp16_control/outputs.json \
+		--vllm-dflare-outputs results/measured/vllm_dflare_patch_rtx8000_fp16_smoke/outputs.json \
+		--output results/measured/dflare_comparison_rtx8000_fp16.json
+	uv run python visualization/plot_dflare_comparison.py \
+		results/measured/dflare_comparison_rtx8000_fp16.json \
+		results/figures/dflare_rtx8000_fp16_comparison.svg
 
 visualize: demo demo-spec
 	uv run python visualization/plot_request_timeline.py \

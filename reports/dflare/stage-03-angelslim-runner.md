@@ -1,6 +1,6 @@
 # Stage 3 — AngelSlim external runner
 
-Status: implemented; GPU execution pending checkpoint download.
+Status: complete; the subsequent GPU execution is recorded in stages 4 and 5.
 
 ## Design
 
@@ -25,6 +25,6 @@ DeepSpeed dependencies from AngelSlim's package initializers.
 
 ## External environment change
 
-The reused `/home/oricrane/SD LLM Serving/.venv` received `datasets==5.0.1`,
+The reused external AngelSlim-compatible environment received `datasets==5.0.1`,
 `loguru==0.7.3`, `multiprocess==0.70.19`, `xxhash==4.0.1`, and an update from
 `pyarrow==19.0.1` to `pyarrow==25.0.1`. No AngelSlim package was installed.

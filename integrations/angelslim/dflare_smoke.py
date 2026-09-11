@@ -24,6 +24,7 @@ DEFAULT_PROMPTS = [
     "Explain why KV caching accelerates autoregressive decoding in one sentence.",
     "What is the difference between prefill and decode?",
     "Give two benefits of continuous batching.",
+    "How many positive whole-number divisors does 196 have?",
 ]
 
 

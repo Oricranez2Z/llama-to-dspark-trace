@@ -1,0 +1,97 @@
+[
+  {
+    "request_id": "0",
+    "prompt": "Explain KV cache in one sentence.",
+    "prompt_token_ids": [
+      840,
+      20772,
+      84648,
+      6500,
+      304,
+      825,
+      11652,
+      13
+    ],
+    "outputs": [
+      {
+        "index": 0,
+        "text": " KV cache is a mechanism used in large",
+        "token_ids": [
+          84648,
+          6500,
+          374,
+          264,
+          16953,
+          1483,
+          304,
+          3460
+        ],
+        "finish_reason": "length"
+      }
+    ]
+  },
+  {
+    "request_id": "1",
+    "prompt": "Why does continuous batching improve GPU utilization?",
+    "prompt_token_ids": [
+      10234,
+      1558,
+      19259,
+      84256,
+      7269,
+      22670,
+      49449,
+      30
+    ],
+    "outputs": [
+      {
+        "index": 0,
+        "text": " Continuous batching is a technique used in machine",
+        "token_ids": [
+          68967,
+          84256,
+          374,
+          264,
+          14762,
+          1483,
+          304,
+          5662
+        ],
+        "finish_reason": "length"
+      }
+    ]
+  },
+  {
+    "request_id": "2",
+    "prompt": "Describe prefill and decode in two short sentences.",
+    "prompt_token_ids": [
+      74785,
+      855,
+      7559,
+      323,
+      16895,
+      304,
+      1378,
+      2805,
+      22870,
+      13
+    ],
+    "outputs": [
+      {
+        "index": 0,
+        "text": " Prefill is the process of loading a",
+        "token_ids": [
+          42588,
+          483,
+          374,
+          279,
+          1882,
+          315,
+          8277,
+          264
+        ],
+        "finish_reason": "length"
+      }
+    ]
+  }
+]

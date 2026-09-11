@@ -92,6 +92,11 @@ def main() -> None:
     parser.add_argument("--max-model-len", type=int, default=256)
     parser.add_argument("--max-tokens", type=int, default=16)
     parser.add_argument("--seed", type=int, default=7)
+    parser.add_argument("--speculative-model")
+    parser.add_argument("--speculative-model-label")
+    parser.add_argument("--speculative-method", choices=["dflash", "dflare"])
+    parser.add_argument("--num-speculative-tokens", type=int, default=15)
+    parser.add_argument("--gpu-memory-utilization", type=float, default=0.5)
     parser.add_argument("--skip-warmup", action="store_true")
     args = parser.parse_args()
 
@@ -104,11 +109,22 @@ def main() -> None:
     sampling = SamplingParams(temperature=0, max_tokens=args.max_tokens, seed=args.seed)
 
     init_started = time.perf_counter()
+    speculative_config = None
+    if args.speculative_model is not None:
+        if args.speculative_method is None:
+            raise ValueError("--speculative-method is required with a draft model")
+        speculative_config = {
+            "method": args.speculative_method,
+            "model": args.speculative_model,
+            "num_speculative_tokens": args.num_speculative_tokens,
+        }
     engine = LLM(
         model=args.model,
         tensor_parallel_size=1,
         enforce_eager=True,
         max_model_len=args.max_model_len,
+        gpu_memory_utilization=args.gpu_memory_utilization,
+        speculative_config=speculative_config,
     )
     torch.cuda.synchronize()
     init_seconds = time.perf_counter() - init_started
@@ -135,6 +151,15 @@ def main() -> None:
         "mode": "measured_gpu_offline_batch_smoke",
         "benchmark_claim": False,
         "model": args.model_label or args.model,
+        "speculative": (
+            {
+                "method": args.speculative_method,
+                "model": args.speculative_model_label or args.speculative_model,
+                "num_speculative_tokens": args.num_speculative_tokens,
+            }
+            if speculative_config is not None
+            else None
+        ),
         "sampling": {
             "temperature": 0,
             "max_tokens": args.max_tokens,

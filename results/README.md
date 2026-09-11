@@ -25,8 +25,22 @@ measured/vllm_gpu_smoke/
 measured/dspark_gpu_smoke/
     DeepSpec result metadata and proposal/verification trace.
 
+measured/dflare_rtx8000_fp16_smoke/
+    Official DFlare checkpoint load and short AngelSlim lossless smoke.
+
+measured/ar_dflash_dflare_rtx8000_fp16_mixed4/
+    Four-prompt FP16/SDPA controlled comparison with full request records.
+
+measured/dflare_comparison_rtx8000_fp16.json
+    Compact derived metrics and AngelSlim/vLLM exact-token checks.
+
+measured/vllm_ar_rtx8000_fp16_control/
+measured/vllm_dflare_patch_rtx8000_fp16_smoke/
+    Same-prompt AR control and experimental patched-vLLM DFlare smoke.
+
 figures/vllm_scheduler_trace.svg
 figures/dspark_verification_rounds.svg
+figures/dflare_rtx8000_fp16_comparison.svg
     Visual summaries generated from the measured traces.
 ```
 
@@ -34,8 +48,9 @@ Regenerate them with:
 
 ```bash
 make samples
+make compare-dflare
 ```
 
 These artifacts are not GPU benchmarks and must not be presented as measured
-vLLM or DSpark speedups. The GPU directories are measured smoke tests, but their
+vLLM, DSpark, DFlash, or DFlare speedups. The GPU directories are measured smoke tests, but their
 tiny workloads are not statistically meaningful performance comparisons.

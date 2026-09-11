@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "source": "results/measured/ar_dflash_dflare_rtx8000_fp16_mixed4/result.json",
+  "benchmark_claim": false,
+  "environment": {
+    "python": "3.11.15",
+    "torch": "2.6.0+cu124",
+    "torch_cuda": "12.4",
+    "transformers": "4.57.6",
+    "gpu": "Quadro RTX 8000",
+    "compute_capability": "7.5",
+    "gpu_memory_bytes": 50756386816,
+    "physical_gpu_index": "1",
+    "driver": "560.35.03"
+  },
+  "config": {
+    "dtype": "float16",
+    "attention": "sdpa",
+    "temperature": 0.0,
+    "max_new_tokens": 32,
+    "prompt_count": 4
+  },
+  "methods": [
+    {
+      "method": "ar",
+      "mean_time_per_output_token_seconds": 0.059977952972985804,
+      "mean_committed_tokens_per_round": 1,
+      "round_count": 128,
+      "speedup_vs_ar": 1.0
+    },
+    {
+      "method": "dflare",
+      "mean_time_per_output_token_seconds": 0.017321678358712234,
+      "mean_committed_tokens_per_round": 4.4,
+      "round_count": 30,
+      "speedup_vs_ar": 3.4625947746465844
+    },
+    {
+      "method": "dflash",
+      "mean_time_per_output_token_seconds": 0.07193338246725034,
+      "mean_committed_tokens_per_round": 1,
+      "round_count": 128,
+      "speedup_vs_ar": 0.8337985913604498
+    }
+  ],
+  "angelslim_lossless_check": {
+    "dflare": true,
+    "dflash": true
+  },
+  "limitations": [
+    "Four prompts and one decode length are a smoke test, not a benchmark.",
+    "The methods run sequentially and do not include a concurrency sweep.",
+    "RTX 8000 FP16/SDPA results must not be extrapolated to RTX 4090 BF16/FlashAttention."
+  ],
+  "vllm_lossless_check": {
+    "request_count_matches": true,
+    "all_token_ids_match": true,
+    "per_request": [
+      {
+        "prompt_index": 0,
+        "token_ids_match": true,
+        "ar_output_tokens": 8,
+        "dflare_output_tokens": 8
+      },
+      {
+        "prompt_index": 1,
+        "token_ids_match": true,
+        "ar_output_tokens": 8,
+        "dflare_output_tokens": 8
+      },
+      {
+        "prompt_index": 2,
+        "token_ids_match": true,
+        "ar_output_tokens": 8,
+        "dflare_output_tokens": 8
+      }
+    ]
+  }
+}

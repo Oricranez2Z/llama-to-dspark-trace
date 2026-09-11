@@ -1,0 +1,243 @@
+{
+  "schema_version": 1,
+  "mode": "measured_gpu_reference_smoke",
+  "benchmark_claim": false,
+  "models": {
+    "target": "Qwen/Qwen3-4B",
+    "drafts": [
+      {
+        "method": "dflare",
+        "label": "AngelSlim/Qwen3-4b-dflare",
+        "load_seconds": 0.7575489301234484,
+        "block_size": 16,
+        "target_layer_ids": [
+          1,
+          5,
+          9,
+          13,
+          17,
+          21,
+          25,
+          29,
+          33
+        ]
+      }
+    ]
+  },
+  "config": {
+    "dtype": "float16",
+    "attention": "sdpa",
+    "temperature": 0.0,
+    "max_new_tokens": 8,
+    "prompt_count": 3
+  },
+  "environment": {
+    "python": "3.11.15",
+    "torch": "2.6.0+cu124",
+    "torch_cuda": "12.4",
+    "transformers": "4.57.6",
+    "gpu": "Quadro RTX 8000",
+    "compute_capability": "7.5",
+    "gpu_memory_bytes": 50756386816,
+    "physical_gpu_index": "0",
+    "driver": "560.35.03"
+  },
+  "timing": {
+    "target_load_seconds": 4.916812680661678
+  },
+  "summaries": [
+    {
+      "method": "ar",
+      "request_count": 3,
+      "input_tokens": 68,
+      "output_tokens": 24,
+      "mean_ttft_seconds": 0.18496451464792094,
+      "mean_time_per_output_token_seconds": 0.05199748673476279,
+      "mean_committed_tokens_per_round": 1,
+      "round_count": 24,
+      "speedup_vs_ar": 1.0
+    },
+    {
+      "method": "dflare",
+      "request_count": 3,
+      "input_tokens": 68,
+      "output_tokens": 24,
+      "mean_ttft_seconds": 0.06541372214754422,
+      "mean_time_per_output_token_seconds": 0.014208647344882289,
+      "mean_committed_tokens_per_round": 8,
+      "round_count": 5,
+      "speedup_vs_ar": 3.659566281901661
+    }
+  ],
+  "all_outputs_match_ar": {
+    "dflare": true
+  },
+  "requests": {
+    "ar": [
+      {
+        "prompt_index": 0,
+        "input_tokens": 27,
+        "output_tokens": 8,
+        "generated_token_ids": [
+          82707,
+          47430,
+          14177,
+          973,
+          3078,
+          460,
+          46719,
+          47116
+        ],
+        "generated_text": "KV caching accelerates autoregressive decoding",
+        "ttft_seconds": 0.4346616864204407,
+        "time_per_output_token_seconds": 0.05542441178113222,
+        "committed_tokens_per_round": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "prompt_index": 1,
+        "input_tokens": 22,
+        "output_tokens": 8,
+        "generated_token_ids": [
+          785,
+          3793,
+          3070,
+          1,
+          30552,
+          483,
+          1,
+          334
+        ],
+        "generated_text": "The terms **\"prefill\"**",
+        "ttft_seconds": 0.051613323390483856,
+        "time_per_output_token_seconds": 0.050586379365995526,
+        "committed_tokens_per_round": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "prompt_index": 2,
+        "input_tokens": 19,
+        "output_tokens": 8,
+        "generated_token_ids": [
+          11613,
+          7567,
+          315,
+          19259,
+          84256,
+          525,
+          1447,
+          16
+        ],
+        "generated_text": "Two benefits of continuous batching are:\n\n1",
+        "ttft_seconds": 0.06861853413283825,
+        "time_per_output_token_seconds": 0.049981669057160616,
+        "committed_tokens_per_round": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    ],
+    "dflare": [
+      {
+        "prompt_index": 0,
+        "input_tokens": 27,
+        "output_tokens": 8,
+        "generated_token_ids": [
+          82707,
+          47430,
+          14177,
+          973,
+          3078,
+          460,
+          46719,
+          47116
+        ],
+        "generated_text": "KV caching accelerates autoregressive decoding",
+        "ttft_seconds": 0.06566087156534195,
+        "time_per_output_token_seconds": 0.01149259996600449,
+        "committed_tokens_per_round": [
+          9
+        ]
+      },
+      {
+        "prompt_index": 1,
+        "input_tokens": 22,
+        "output_tokens": 8,
+        "generated_token_ids": [
+          785,
+          3793,
+          3070,
+          1,
+          30552,
+          483,
+          1,
+          334
+        ],
+        "generated_text": "The terms **\"prefill\"**",
+        "ttft_seconds": 0.0661354809999466,
+        "time_per_output_token_seconds": 0.023269417695701122,
+        "committed_tokens_per_round": [
+          3,
+          2,
+          16
+        ]
+      },
+      {
+        "prompt_index": 2,
+        "input_tokens": 19,
+        "output_tokens": 8,
+        "generated_token_ids": [
+          11613,
+          7567,
+          315,
+          19259,
+          84256,
+          525,
+          1447,
+          16
+        ],
+        "generated_text": "Two benefits of continuous batching are:\n\n1",
+        "ttft_seconds": 0.06444481387734413,
+        "time_per_output_token_seconds": 0.007863924372941256,
+        "committed_tokens_per_round": [
+          10
+        ]
+      }
+    ]
+  },
+  "limitations": [
+    "Small fixed prompt set; not a statistically meaningful benchmark.",
+    "Eager Python control flow favors transparency over peak serving speed.",
+    "SDPA favors portability over the peak speed of FlashAttention.",
+    "Pre-Ampere FP16 results are not comparable to BF16 FlashAttention results."
+  ],
+  "provenance": {
+    "angelslim": {
+      "commit": "ee8ddb2b43e20800bcfdda1e9ac34ea2aab5de5d",
+      "dirty": false
+    },
+    "runner": "integrations/angelslim/dflare_smoke.py"
+  }
+}

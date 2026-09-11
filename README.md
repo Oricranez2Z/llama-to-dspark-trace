@@ -31,6 +31,8 @@ flowchart LR
     G --> K[Draft Proposer]
     K --> L[Target Verifier]
     L --> I
+    G --> M[DFlare Layer-wise Fusion]
+    M --> K
 ```
 
 ## What is implemented
@@ -58,6 +60,14 @@ flowchart LR
 - Rejected-suffix handling and bonus tokens.
 - A load-aware confidence scheduler inspired by DSpark.
 - Fixed-length and confidence-scheduled simulation experiments.
+
+### DFlare learning track
+
+- Independent NumPy model of per-draft-layer target-feature fusion.
+- Masked block proposal connected to the same lossless greedy verifier.
+- Normalized round traces covering proposal, acceptance, rejection, and commit.
+- Isolated AngelSlim runner for official Qwen3-4B DFlare/DFlash checkpoints.
+- Portable experimental vLLM V1 patch with an RTX 8000 end-to-end smoke.
 
 ### Framework tracing
 
@@ -90,6 +100,7 @@ Run the scheduler and speculative-decoding experiments:
 ```bash
 make demo
 make demo-spec
+make demo-dflare
 make visualize
 ```
 
@@ -122,12 +133,13 @@ Curated examples:
 - [Speculative acceptance](results/figures/speculative_acceptance.svg)
 - [Measured vLLM scheduler trace](results/figures/vllm_scheduler_trace.svg)
 - [Measured DSpark verification rounds](results/figures/dspark_verification_rounds.svg)
+- [Measured AR/DFlash/DFlare comparison](results/figures/dflare_rtx8000_fp16_comparison.svg)
 - [Sample scheduler trace](results/sample_traces/scheduler_trace.jsonl)
 - [Sample speculative summary](results/sample_traces/speculative_summary.json)
 
 ## Measured GPU smoke tests
 
-The repository includes two small, reproducible GPU artifacts recorded on a
+The repository includes small, reproducible GPU artifacts recorded on a
 Quadro RTX 8000. They validate the instrumentation path; they are not production
 benchmarks.
 
@@ -135,6 +147,8 @@ benchmarks.
 |---|---|---|
 | vLLM | 3 requests, 26 input and 48 output tokens | 0.465 s batch, 103.3 output tok/s |
 | DeepSpec DSpark | 1 GSM8K sample, seven 7-token proposals | 5.57 mean accepted draft tokens |
+| AngelSlim DFlare | 4 requests, 128 output tokens, FP16/SDPA | exact AR output; 4.40 mean committed tokens/round |
+| Patched vLLM DFlare | 3 requests, 24 output tokens, eager FP16 | exact AR output; end-to-end V1 path passed |
 
 See the [GPU reproduction guide](docs/10_gpu_reproduction.md), including exact
 revision, environment, dirty-state, and methodology limitations.
@@ -148,6 +162,8 @@ The local study was performed against these immutable revisions:
 | karpathy/llama2.c | `350e04f` | Minimal one-token generation state machine |
 | vllm-project/vllm | `ff6173997` | Scheduler, paged KV cache, model runner, serving |
 | DeepSpec | `005e03b` | DSpark draft and verification reference path |
+| Tencent/AngelSlim | `ee8ddb2b` | DFlare/DFlash model and offline verifier reference |
+| vLLM DFlare patch base | `0fc695fc6` | Experimental V1 model/proposer integration |
 
 The implementation does not copy these projects. See
 [third-party attribution](third_party/README.md) and the detailed
@@ -159,12 +175,15 @@ The implementation does not copy these projects. See
 src/llm_serving_lab/mini_llm/       Llama-style decoder and KV cache
 src/llm_serving_lab/mini_serving/   Scheduler, block manager, engine
 src/llm_serving_lab/speculative/    Proposer, verifier, confidence scheduler
+src/llm_serving_lab/dflare/          Educational fusion and block proposal
 src/llm_serving_lab/tracing/        JSONL schema and framework adapters
+integrations/                        Isolated AngelSlim runner and vLLM patch
 experiments/                        Reproducible CPU and opt-in GPU experiments
 visualization/                      Dependency-free SVG generators
 tests/                              Correctness and invariant tests
 docs/                               Execution-level explanations
-results/                            Curated sample traces and figures
+reports/dflare/                      Saved stage-by-stage engineering reports
+results/                             Curated sample traces and measured smokes
 ```
 
 ## Correctness invariants
@@ -180,6 +199,8 @@ finished requests release all physical blocks
 chunked prefill output == unchunked prefill output
 speculative greedy output == target greedy output
 rejected draft suffix is never emitted
+DFlare layer fusion differs across draft layers
+DFlare speculative greedy output == same-runtime AR output
 ```
 
 ## Trace a local vLLM checkout
@@ -238,6 +259,8 @@ speedup. A full measurement matrix is provided in
 - [Speculative decoding correctness](docs/04_speculative_decoding.md)
 - [DSpark execution path](docs/05_dspark_execution.md)
 - [Experiment methodology](docs/06_experiments.md)
+- [DFlare stages 1–7](reports/dflare/)
+- [Experimental vLLM DFlare patch](integrations/vllm/README.md)
 - [Limitations](docs/07_limitations.md)
 - [GitHub publishing checklist](docs/08_github_publishing.md)
 - [Resume presentation](docs/09_resume_presentation.md)
