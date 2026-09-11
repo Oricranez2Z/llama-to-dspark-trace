@@ -26,5 +26,13 @@ does not vendor the source code or model weights of the projects below.
 - License: MIT at the studied revision, with additional notices in that project
 - Use: reference for DSpark model, draft proposal, and verification flow
 
+## AngelSlim and DFlare
+
+- Project: <https://github.com/Tencent/AngelSlim>
+- Studied revision: `ee8ddb2b43e20800bcfdda1e9ac34ea2aab5de5d`
+- License: Apache-2.0, with third-party notices in that project
+- Use: reference for DFlare layer-wise fusion, official checkpoint loading,
+  and offline comparison methodology
+
 Model checkpoints, datasets, and generated outputs remain subject to their own
 licenses and usage terms. They are not redistributed here.
