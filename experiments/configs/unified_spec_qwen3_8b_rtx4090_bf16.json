@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "name": "qwen3_8b_unified_spec_rtx4090_fp16_eager",
+  "name": "qwen3_8b_unified_spec_rtx4090_bf16_eager",
   "target_label": "Qwen/Qwen3-8B",
   "target_revision": "b968826d9c46dd6066d109eabc6255188de91218",
   "workload_label": "unified_qwen3_8b_v1",
@@ -12,7 +12,7 @@
   "seed": 20260916,
   "gpu_memory_utilization": 0.88,
   "enforce_eager": true,
-  "dtype": "float16",
+  "dtype": "bfloat16",
   "methods": [
     {
       "name": "ar",
@@ -26,28 +26,36 @@
       "label": "RedHatAI/Qwen3-8B-speculator.eagle3",
       "speculative_method": "eagle3",
       "num_speculative_tokens": 7,
-      "draft_revision": "08610ffa01dd9f16731fe8f627b85905b6aa51c4"
+      "draft_revision": "08610ffa01dd9f16731fe8f627b85905b6aa51c4",
+      "checkpoint_block_size": 7,
+      "block_mode": "native"
     },
     {
       "name": "dflash",
       "label": "z-lab/Qwen3-8B-DFlash-b16",
       "speculative_method": "dflash",
       "num_speculative_tokens": 15,
-      "draft_revision": "9b41424b7109f9c5413454f481b09a82b85333f4"
+      "draft_revision": "9b41424b7109f9c5413454f481b09a82b85333f4",
+      "checkpoint_block_size": 16,
+      "block_mode": "native"
     },
     {
       "name": "dflare",
       "label": "AngelSlim/Qwen3-8b-dflare",
       "speculative_method": "dflare",
       "num_speculative_tokens": 15,
-      "draft_revision": "55e2c8d86d76ce1e79fa3b8642c7f80091285a82"
+      "draft_revision": "55e2c8d86d76ce1e79fa3b8642c7f80091285a82",
+      "checkpoint_block_size": 16,
+      "block_mode": "native"
     },
     {
       "name": "dspark",
       "label": "DeepSpec Qwen3-8B DSpark block7",
       "speculative_method": "dspark",
       "num_speculative_tokens": 7,
-      "draft_revision": "local-converted-checkpoint"
+      "draft_revision": "local-converted-checkpoint",
+      "checkpoint_block_size": 7,
+      "block_mode": "native"
     }
   ]
 }

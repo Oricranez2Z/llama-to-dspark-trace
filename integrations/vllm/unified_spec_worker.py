@@ -95,17 +95,80 @@ def _trace_summary(
         and event["fields"].get("scheduled_tokens")
     ]
     prefill_steps = 1 if scheduled else 0
-    decode_steps = max(0, len(scheduled) - prefill_steps)
-    committed = output_tokens / (decode_steps * request_count) if decode_steps else 0.0
+    decode_events = scheduled[prefill_steps:]
+    decode_steps = len(decode_events)
+    decode_request_steps = sum(
+        len(event["fields"]["scheduled_tokens"]) for event in decode_events
+    )
+    decode_output_tokens = max(0, output_tokens - request_count * prefill_steps)
+    committed = (
+        decode_output_tokens / decode_request_steps if decode_request_steps else 0.0
+    )
+    acceptance_events = [
+        event for event in events if event["kind"] == "vllm_spec_decode_acceptance"
+    ]
+    acceptance: dict[str, Any] | None = None
+    if acceptance_events:
+        draft_counts = [
+            int(event["fields"]["num_draft_tokens"])
+            for event in acceptance_events
+        ]
+        accepted_counts = [
+            int(event["fields"]["num_accepted_tokens"])
+            for event in acceptance_events
+        ]
+        width = max(draft_counts, default=0)
+        drafted_per_position = [
+            sum(count > position for count in draft_counts) for position in range(width)
+        ]
+        accepted_per_position = [
+            sum(count > position for count in accepted_counts)
+            for position in range(width)
+        ]
+        histogram: dict[str, int] = {}
+        for count in accepted_counts:
+            key = str(count)
+            histogram[key] = histogram.get(key, 0) + 1
+        num_drafts = len(acceptance_events)
+        total_draft_tokens = sum(draft_counts)
+        total_accepted_tokens = sum(accepted_counts)
+        acceptance = {
+            "num_drafts": num_drafts,
+            "num_draft_tokens": total_draft_tokens,
+            "num_accepted_tokens": total_accepted_tokens,
+            "mean_acceptance_length_including_bonus": (
+                1 + total_accepted_tokens / num_drafts
+            ),
+            "draft_token_acceptance_rate": (
+                total_accepted_tokens / total_draft_tokens
+                if total_draft_tokens
+                else 0.0
+            ),
+            "accepted_draft_tokens_histogram": histogram,
+            "num_draft_tokens_per_position": drafted_per_position,
+            "num_accepted_tokens_per_position": accepted_per_position,
+            "per_position_acceptance_rate": [
+                accepted / drafted if drafted else 0.0
+                for accepted, drafted in zip(
+                    accepted_per_position, drafted_per_position, strict=True
+                )
+            ],
+            "definition": (
+                "exact scheduler-reported accepted draft tokens; the conventional "
+                "mean acceptance length adds one target bonus token"
+            ),
+        }
     return {
         "nonempty_scheduler_steps": len(scheduled),
         "assumed_prefill_steps": prefill_steps,
         "decode_steps": decode_steps,
+        "decode_request_steps": decode_request_steps,
         "mean_committed_tokens_per_decode_step": committed,
         "definition": (
-            "output tokens / (post-prefill scheduler steps * request count); "
-            "all requests use ignore_eos and equal output length"
+            "post-prefill output tokens / active request decode steps; all requests "
+            "use ignore_eos and equal output length"
         ),
+        "speculative_acceptance": acceptance,
     }
 
 
@@ -156,7 +219,7 @@ def main() -> None:
     init_started = time.perf_counter()
     engine = LLM(
         model=args.target_path,
-        dtype="float16",
+        dtype=spec.dtype,
         tensor_parallel_size=1,
         enforce_eager=spec.enforce_eager,
         max_model_len=spec.max_model_len,
@@ -220,6 +283,8 @@ def main() -> None:
             "speculative_method": method.speculative_method,
             "num_speculative_tokens": method.num_speculative_tokens,
             "draft_revision": method.draft_revision,
+            "checkpoint_block_size": method.checkpoint_block_size,
+            "block_mode": method.block_mode,
         },
         "target": {
             "label": spec.target_label,
@@ -260,7 +325,7 @@ def main() -> None:
             "model_runner": (
                 "v2" if os.environ.get("VLLM_USE_V2_MODEL_RUNNER") == "1" else "v1"
             ),
-            "requested_dtype": "float16",
+            "requested_dtype": spec.dtype,
             "effective_target_dtype": str(engine.llm_engine.model_config.dtype),
             "enforce_eager": spec.enforce_eager,
             "engine_seed": spec.seed,

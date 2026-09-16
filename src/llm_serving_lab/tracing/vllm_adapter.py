@@ -133,9 +133,44 @@ class VLLMTraceAdapter:
 
             return wrapped
 
+        def wrap_spec_stats(original: Callable[..., Any]) -> Callable[..., Any]:
+            @wraps(original)
+            def wrapped(
+                instance: Any,
+                spec_decoding_stats: Any,
+                num_draft_tokens: int,
+                num_accepted_tokens: int,
+                num_invalid_spec_tokens: dict[str, int] | None,
+                request_id: str,
+            ) -> Any:
+                invalid = (
+                    num_invalid_spec_tokens.get(request_id, 0)
+                    if num_invalid_spec_tokens
+                    else 0
+                )
+                adapter.recorder.emit(
+                    "vllm_spec_decode_acceptance",
+                    step=max(0, adapter._step - 1),
+                    request_id=str(request_id),
+                    num_draft_tokens=max(0, int(num_draft_tokens) - int(invalid)),
+                    num_accepted_tokens=int(num_accepted_tokens),
+                    num_invalid_spec_tokens=int(invalid),
+                )
+                return original(
+                    instance,
+                    spec_decoding_stats,
+                    num_draft_tokens,
+                    num_accepted_tokens,
+                    num_invalid_spec_tokens,
+                    request_id,
+                )
+
+            return wrapped
+
         self._patch(Scheduler, "schedule", wrap_schedule)
         self._patch(KVCacheManager, "allocate_slots", wrap_allocate)
         self._patch(OutputProcessor, "process_outputs", wrap_outputs)
+        self._patch(Scheduler, "make_spec_decoding_stats", wrap_spec_stats)
         return self
 
     def uninstall(self) -> None:

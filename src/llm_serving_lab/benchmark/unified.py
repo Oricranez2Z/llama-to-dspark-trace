@@ -10,6 +10,13 @@ from pathlib import Path
 from typing import Any
 
 METHODS = {"ar", "eagle3", "dflash", "dflare", "dspark"}
+SPECULATIVE_METHODS = METHODS - {"ar"}
+ALLOWED_RUNTIME_METHODS = {
+    "eagle3": {"eagle3"},
+    "dflash": {"dflash", "dspark"},
+    "dflare": {"dflare"},
+    "dspark": {"dspark"},
+}
 
 
 @dataclass(frozen=True)
@@ -19,6 +26,8 @@ class MethodSpec:
     speculative_method: str | None
     num_speculative_tokens: int
     draft_revision: str | None = None
+    checkpoint_block_size: int | None = None
+    block_mode: str = "native"
 
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> MethodSpec:
@@ -28,6 +37,12 @@ class MethodSpec:
             speculative_method=value.get("speculative_method"),
             num_speculative_tokens=int(value.get("num_speculative_tokens", 0)),
             draft_revision=value.get("draft_revision"),
+            checkpoint_block_size=(
+                int(value["checkpoint_block_size"])
+                if value.get("checkpoint_block_size") is not None
+                else None
+            ),
+            block_mode=str(value.get("block_mode", "native")),
         )
         if method.name not in METHODS:
             raise ValueError(f"unsupported method: {method.name}")
@@ -35,10 +50,20 @@ class MethodSpec:
             if method.speculative_method is not None or method.num_speculative_tokens:
                 raise ValueError("AR cannot have a speculative method or draft length")
         elif (
-            method.speculative_method != method.name
+            method.speculative_method not in SPECULATIVE_METHODS
+            or method.speculative_method not in ALLOWED_RUNTIME_METHODS[method.name]
             or method.num_speculative_tokens <= 0
         ):
             raise ValueError(f"invalid speculative contract for {method.name}")
+        if method.block_mode not in {"native", "runtime_truncated"}:
+            raise ValueError(
+                f"invalid block mode for {method.name}: {method.block_mode}"
+            )
+        if (
+            method.checkpoint_block_size is not None
+            and method.checkpoint_block_size <= 0
+        ):
+            raise ValueError("checkpoint_block_size must be positive")
         return method
 
 
@@ -58,6 +83,7 @@ class BenchmarkSpec:
     gpu_memory_utilization: float
     enforce_eager: bool
     methods: tuple[MethodSpec, ...]
+    dtype: str = "float16"
 
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> BenchmarkSpec:
@@ -82,6 +108,7 @@ class BenchmarkSpec:
             gpu_memory_utilization=float(value["gpu_memory_utilization"]),
             enforce_eager=bool(value["enforce_eager"]),
             methods=methods,
+            dtype=str(value.get("dtype", "float16")),
         )
         if spec.schema_version != 1:
             raise ValueError("only benchmark schema version 1 is supported")
@@ -98,6 +125,8 @@ class BenchmarkSpec:
             raise ValueError("benchmark dimensions must be positive")
         if not 0 < spec.gpu_memory_utilization <= 1:
             raise ValueError("gpu_memory_utilization must be in (0, 1]")
+        if spec.dtype not in {"float16", "bfloat16"}:
+            raise ValueError("dtype must be float16 or bfloat16")
         return spec
 
     def method(self, name: str) -> MethodSpec:
@@ -188,6 +217,9 @@ def aggregate_results(
                 "method": method.name,
                 "label": method.label,
                 "num_speculative_tokens": method.num_speculative_tokens,
+                "runtime_method": method.speculative_method,
+                "checkpoint_block_size": method.checkpoint_block_size,
+                "block_mode": method.block_mode,
                 "median_batch_seconds": latency,
                 "median_output_tokens_per_second": result["timing"][
                     "median_output_tokens_per_second"
@@ -202,8 +234,38 @@ def aggregate_results(
                 "mean_committed_tokens_per_decode_step": result["scheduler"][
                     "mean_committed_tokens_per_decode_step"
                 ],
+                "speculative_acceptance": result["scheduler"].get(
+                    "speculative_acceptance"
+                ),
                 "batch_seconds": result["timing"]["batch_seconds"],
             }
+        )
+
+    speculative_methods = [
+        method for method in spec.methods if method.name != "ar"
+    ]
+    proposal_lengths = sorted(
+        {method.num_speculative_tokens for method in speculative_methods}
+    )
+    comparison_notes = (
+        [f"All speculative methods use K={proposal_lengths[0]} in this run."]
+        if len(proposal_lengths) == 1
+        else [
+            "Proposal lengths remain checkpoint-native and are reported per method."
+        ]
+    )
+    if any(method.block_mode == "runtime_truncated" for method in speculative_methods):
+        comparison_notes.append(
+            "At least one checkpoint is truncated to a smaller runtime K; this "
+            "controls verifier width but is not a matched-training-block ablation."
+        )
+    if any(
+        method.name == "dflash" and method.speculative_method == "dspark"
+        for method in speculative_methods
+    ):
+        comparison_notes.append(
+            "DeepSpec DFlash uses its native anchor-sampling layout through the "
+            "DSpark runtime path with its Markov head disabled."
         )
 
     return {
@@ -228,6 +290,7 @@ def aggregate_results(
             "seed": spec.seed,
             "enforce_eager": spec.enforce_eager,
             "prefix_caching": False,
+            "dtype": spec.dtype,
         },
         "methods": rows,
         "all_speculative_outputs_match_ar": all(
@@ -242,7 +305,7 @@ def aggregate_results(
         "environment": by_name["ar"]["environment"],
         "notes": [
             "All methods use one vLLM source revision and one target checkpoint.",
-            "Proposal lengths remain checkpoint-native and are reported per method.",
+            *comparison_notes,
             "Lossless correctness is gated through the first EOS token; strict "
             "fixed-length equality is also reported because ignore_eos=True.",
             "Results describe this fixed offline batch on this GPU, not online "

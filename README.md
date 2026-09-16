@@ -151,17 +151,23 @@ every method.
 
 | Method | K | Median output tok/s | vs AR | committed/step |
 |---|---:|---:|---:|---:|
-| AR | 0 | 122.74 | 1.000× | 1.016 |
-| EAGLE3 | 7 | 133.35 | 1.086× | 1.730 |
-| DFlash | 15 | 68.66 | 0.559× | 1.016 |
-| DFlare | 15 | 161.06 | 1.312× | 2.133 |
-| DSpark | 7 | 204.76 | 1.668× | 2.560 |
+| AR | 0 | 119.40 | 1.000× | 1.000 |
+| EAGLE3 | 7 | 104.20 | 0.873× | 2.558 |
+| DFlash | 7 | 167.74 | 1.405× | 3.429 |
+| DFlare | 7 | 172.61 | 1.446× | 3.600 |
+| DSpark | 7 | 204.78 | 1.715× | 3.847 |
 
 This table is deliberately marked **provisional**: another process occupied
-25.6 GiB and 57–100% GPU utilization during the run. The machine-readable
+25.6 GiB and 42–100% GPU utilization during the run. The machine-readable
 result sets `benchmark_claim=false`; use it to validate the comparison path,
 not as a headline speed claim. See the [stage report](reports/unified/stage-03-rtx8000-results.md)
 and [unified protocol](docs/11_unified_speculative_benchmark.md).
+
+For RTX 4090 validation, the one-command runner executes the full BF16 native
+comparison, a DFlash BF16/FP16 control, and a matched-runtime-width `K=7`
+comparison. It records exact per-position draft acceptance and produces
+`REPORT.md`, JSON, traces, and SVG figures. See
+[the 4090 command](docs/11_unified_speculative_benchmark.md#one-command-rtx-4090-validation).
 
 ## Earlier GPU smoke tests
 
@@ -288,6 +294,7 @@ speedup. A full measurement matrix is provided in
 - [Speculative decoding correctness](docs/04_speculative_decoding.md)
 - [DSpark execution path](docs/05_dspark_execution.md)
 - [Experiment methodology](docs/06_experiments.md)
+- [Unified benchmark and RTX 4090 runner](docs/11_unified_speculative_benchmark.md)
 - [DFlare stages 1–7](reports/dflare/)
 - [Experimental vLLM DFlare patch](integrations/vllm/README.md)
 - [Limitations](docs/07_limitations.md)

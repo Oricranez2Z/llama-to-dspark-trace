@@ -12,7 +12,7 @@ not a claim of upstream support.
 | patched revision | `7160b69e68eca230d26e6e72dbc72c3886741799` |
 | patch directory | `patches/unified/` |
 | target | `Qwen/Qwen3-8B@b968826d9c46dd6066d109eabc6255188de91218` |
-| verified path | V2 GPU runner, CUDA, TP=1, greedy, eager, FP16 |
+| verified path | V2 GPU runner, CUDA, TP=1, greedy, eager, configurable FP16/BF16 |
 
 Apply the four commits to a clean branch or worktree:
 
@@ -37,17 +37,20 @@ path. DFlare retains one fused target context per draft layer and inserts each
 layer into its own KV-cache slot mapping.
 
 The worker `unified_spec_worker.py` deliberately runs only one method per
-process. It fixes dtype, runner, target, tokenizer, prompt rendering, sampling,
-batch size, eager mode, prefix-cache setting, and trace collection. The outer
-runner validates hashes and performs AR equality checks.
+process. It fixes the configured dtype, runner, target, tokenizer, prompt
+rendering, sampling, batch size, eager mode, prefix-cache setting, and trace
+collection. The outer runner validates hashes and performs AR equality checks.
+Use `experiments/prepare_deepspec_checkpoint.py` to create the lightweight
+vLLM config view required by the released DeepSpec Qwen3 EAGLE3 checkpoint;
+the utility symlinks the original weights and leaves the snapshot unchanged.
 
 ## Validation performed
 
 ```text
 vLLM changed-file Ruff checks: passed
 vLLM DFlare model tests: 3 passed
-main repository tests: 30 passed
-five-method V2 smoke: passed; all tokens matched AR
+main repository tests: 36 passed
+five-method V2 smoke: passed; all methods lossless through EOS
 formal RTX 8000 run: all methods matched AR through EOS
 vLLM result commit: clean
 ```

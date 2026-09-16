@@ -11,6 +11,7 @@ import subprocess
 from pathlib import Path
 
 from llm_serving_lab.benchmark import (
+    MethodSpec,
     aggregate_results,
     load_benchmark_spec,
     load_workload,
@@ -28,6 +29,53 @@ def _draft_mapping(values: list[str]) -> dict[str, Path]:
             raise ValueError("--draft must use METHOD=PATH")
         mapping[name] = Path(raw_path).resolve()
     return mapping
+
+
+def _validate_draft_contract(method: MethodSpec, path: Path) -> None:
+    config_path = path / "config.json"
+    if not config_path.is_file():
+        raise FileNotFoundError(config_path)
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    actual_block_size = config.get("block_size", config.get("n_predict"))
+    if (
+        method.checkpoint_block_size is not None
+        and actual_block_size is not None
+        and int(actual_block_size) != method.checkpoint_block_size
+    ):
+        raise ValueError(
+            f"{method.name} declares checkpoint block "
+            f"{method.checkpoint_block_size}, but {path} contains "
+            f"block {actual_block_size}"
+        )
+    native_k = method.checkpoint_block_size
+    if native_k is not None and method.speculative_method in {"dflash", "dflare"}:
+        native_k -= 1
+    if (
+        method.block_mode == "native"
+        and native_k is not None
+        and method.num_speculative_tokens != native_k
+    ):
+        raise ValueError(
+            f"{method.name} native checkpoint block requires K={native_k}"
+        )
+    if (
+        method.block_mode == "runtime_truncated"
+        and (
+            method.checkpoint_block_size is None
+            or native_k is None
+            or method.num_speculative_tokens >= native_k
+        )
+    ):
+        raise ValueError(
+            f"{method.name} runtime_truncated requires K below native K"
+        )
+    if method.name == "dflash" and method.speculative_method == "dspark":
+        architectures = config.get("architectures") or []
+        if "Qwen3DSparkModel" not in architectures or config.get("markov_rank") != 0:
+            raise ValueError(
+                "DFlash routed through the DSpark runtime requires a DeepSpec "
+                "Qwen3DSparkModel checkpoint with markov_rank=0"
+            )
 
 
 def _gpu_snapshot(index: str) -> dict[str, object]:
@@ -112,6 +160,9 @@ def main() -> None:
     for path in paths:
         if not path.exists():
             raise FileNotFoundError(path)
+    for method in spec.methods:
+        if method.name != "ar":
+            _validate_draft_contract(method, drafts[method.name])
 
     output_dir = args.output_dir.resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
