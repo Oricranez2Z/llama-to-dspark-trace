@@ -4,6 +4,28 @@ GPU dependencies are intentionally external to this small CPU-installable
 package. Run each experiment with the environment belonging to its framework.
 Model checkpoints are not redistributed.
 
+## Unified AR/EAGLE3/DFlash/DFlare/DSpark run
+
+This is the preferred comparison entry point. First apply and build the
+[unified vLLM patch series](../integrations/vllm/README.md). Then run the exact
+command in [the unified benchmark guide](11_unified_speculative_benchmark.md).
+
+The output contains one isolated worker result and normalized trace per method,
+plus a summary with:
+
+- immutable config/workload fingerprint;
+- clean vLLM revision and V2 runner identity;
+- median latency, token throughput, and speedup versus AR;
+- committed tokens per target decode step;
+- equality to AR through EOS and across the forced fixed-length continuation;
+- GPU utilization and external allocation snapshots before every method.
+
+On an RTX 4090, create a fresh vLLM environment and build all CUDA/Triton
+artifacts for compute capability 8.9. Reuse the JSON config and workload, but
+write a new result directory such as
+`results/generated/unified_spec_qwen3_8b_rtx4090_fp16`. Do not reuse RTX 8000
+SM75 binaries or kernel caches.
+
 ## vLLM trace
 
 Set the placeholders to your local checkout, model snapshot, and this lab:
@@ -138,3 +160,7 @@ The original vLLM trace source was dirty and eager execution was forced. The
 patched DFlare manifest records a clean patch commit. The samples are too small
 for statistics. No row is a production performance claim; read the exact
 revisions and limitations from each result manifest.
+
+The newer unified result additionally proves that all five methods execute in
+one vLLM V2 framework and match AR through EOS. Its speed measurements remain
+provisional because the automatic GPU preflight detected a competing process.

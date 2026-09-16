@@ -74,7 +74,7 @@ forward-pass reduction.
 
 Deliverable: `speculative` tests and the fixed-length experiment.
 
-## Stage 5 — DSpark execution and policy
+## Stage 5 — unified speculative execution
 
 Read DeepSpec in this order: evaluator entry, proposal construction, parallel
 draft backbone, Markov head, target verification, metrics. Trace a single
@@ -86,8 +86,14 @@ Separate three questions:
 - How many proposed tokens survive at each position?
 - Does an adaptive proposal length improve end-to-end serving metrics?
 
-The checked-in one-sample GPU trace answers only the second at smoke-test scale.
-A resume-grade performance claim requires the matrix in `docs/06_experiments.md`.
+After reading the standalone reference paths, run EAGLE3, DFlash, DFlare, and
+DSpark behind the same vLLM V2 target/verifier contract. Compare proposal
+length, committed tokens per target step, end-to-end throughput, and AR token
+equality. Do not compare framework-specific runner numbers directly.
+
+The checked-in RTX 8000 run validates this common path but fails the exclusive
+GPU gate. A resume-grade performance claim requires the same protocol on an
+exclusive 4090 plus the matrix in `docs/06_experiments.md`.
 
 ## Suggested twelve-week cadence
 
@@ -98,8 +104,8 @@ A resume-grade performance claim requires the matrix in `docs/06_experiments.md`
 | 5–6 | scheduler and paged KV cache | timeline, block map, invariants |
 | 7–8 | API/streaming and concurrency | request lifecycle notes |
 | 9–10 | speculative decoding | lossless verifier and sweep |
-| 11 | DeepSpec/DSpark | proposal/verification trace |
-| 12 | benchmark and presentation | manifests, figures, conclusions |
+| 11 | EAGLE3/DFlash/DFlare/DSpark | common V2 traces and correctness |
+| 12 | unified benchmark and presentation | manifests, figures, conclusions |
 
 Do not count a section as complete until another reader can reproduce its
 artifact from a command and connect the artifact back to named source boundaries.

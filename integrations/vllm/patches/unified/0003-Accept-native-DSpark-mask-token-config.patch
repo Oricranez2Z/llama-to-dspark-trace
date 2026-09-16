@@ -1,0 +1,67 @@
+From 11d94826530e5ef3b293c00b064f0a9d6bd32ce9 Mon Sep 17 00:00:00 2001
+From: Oricrane <oricranez2z@gmail.com>
+Date: Wed, 16 Sep 2026 15:36:13 +0800
+Subject: [PATCH 3/4] Accept native DSpark mask token config
+
+Allow parallel drafters to read the top-level mask_token_id used by native Qwen3 DSpark checkpoints.
+
+Assisted-by: OpenAI Codex
+---
+ tests/v1/spec_decode/test_eagle.py       | 13 +++++++++++++
+ vllm/v1/spec_decode/llm_base_proposer.py |  5 ++++-
+ 2 files changed, 17 insertions(+), 1 deletion(-)
+
+diff --git a/tests/v1/spec_decode/test_eagle.py b/tests/v1/spec_decode/test_eagle.py
+index b62d7e90d..1043648b1 100644
+--- a/tests/v1/spec_decode/test_eagle.py
++++ b/tests/v1/spec_decode/test_eagle.py
+@@ -1,6 +1,7 @@
+ # SPDX-License-Identifier: Apache-2.0
+ # SPDX-FileCopyrightText: Copyright contributors to the vLLM project
+ 
++from types import SimpleNamespace
+ from unittest import mock
+ 
+ import numpy as np
+@@ -45,6 +46,18 @@ BLOCK_SIZE = 16
+ DEVICE_TYPE = current_platform.device_type
+ 
+ 
++def test_parallel_drafting_accepts_top_level_mask_token_id() -> None:
++    proposer = object.__new__(EagleProposer)
++    proposer.draft_model_config = SimpleNamespace(
++        hf_config=SimpleNamespace(mask_token_id=151669)
++    )
++    proposer.pass_hidden_states_to_model = False
++
++    proposer._init_parallel_drafting_params()
++
++    assert proposer.parallel_drafting_token_id == 151669
++
++
+ def _create_proposer(
+     method: str,
+     num_speculative_tokens: int,
+diff --git a/vllm/v1/spec_decode/llm_base_proposer.py b/vllm/v1/spec_decode/llm_base_proposer.py
+index e9f17bbbe..bc91a9c45 100644
+--- a/vllm/v1/spec_decode/llm_base_proposer.py
++++ b/vllm/v1/spec_decode/llm_base_proposer.py
+@@ -364,11 +364,14 @@ class SpecDecodeBaseProposer:
+             self.parallel_drafting_token_id = model_hf_config.pard_token
+         elif hasattr(model_hf_config, "ptd_token_id"):
+             self.parallel_drafting_token_id = model_hf_config.ptd_token_id
++        elif hasattr(model_hf_config, "mask_token_id"):
++            self.parallel_drafting_token_id = model_hf_config.mask_token_id
+         else:
+             raise ValueError(
+                 "For parallel drafting, the draft model config must have "
+                 "`pard_token`, `ptd_token_id`, or "
+-                "`dflash_config.mask_token_id` specified in its config.json."
++                "`mask_token_id` (directly or in `dflash_config`) specified "
++                "in its config.json."
+             )
+ 
+         if self.pass_hidden_states_to_model:
+-- 
+2.25.1
+

@@ -1,0 +1,8 @@
+{"id":"systems-kv","category":"systems","messages":[{"role":"user","content":"Explain in two concise sentences why KV caching accelerates autoregressive decoding."}]}
+{"id":"systems-batching","category":"systems","messages":[{"role":"user","content":"Compare static batching and continuous batching for LLM serving."}]}
+{"id":"math-divisors","category":"math","messages":[{"role":"user","content":"How many positive whole-number divisors does 196 have? Show the calculation briefly."}]}
+{"id":"math-rate","category":"math","messages":[{"role":"user","content":"A server processes 240 requests in 80 seconds. If throughput improves by 25%, how many requests per second can it process?"}]}
+{"id":"code-search","category":"code","messages":[{"role":"user","content":"Write a short Python function implementing binary search on a sorted list."}]}
+{"id":"code-lru","category":"code","messages":[{"role":"user","content":"Describe the data structures needed for an O(1) LRU cache implementation."}]}
+{"id":"reasoning-scheduler","category":"reasoning","messages":[{"role":"user","content":"A GPU can process either one prefill chunk costing 4 units or four decode tokens costing 1 unit each per step. Explain one fair scheduling policy."}]}
+{"id":"general-summary","category":"general","messages":[{"role":"user","content":"Summarize the main trade-off of speculative decoding in one paragraph."}]}

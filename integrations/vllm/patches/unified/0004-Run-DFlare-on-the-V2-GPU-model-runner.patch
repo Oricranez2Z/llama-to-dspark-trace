@@ -1,0 +1,195 @@
+From 7160b69e68eca230d26e6e72dbc72c3886741799 Mon Sep 17 00:00:00 2001
+From: Oricrane <oricranez2z@gmail.com>
+Date: Wed, 16 Sep 2026 15:50:54 +0800
+Subject: [PATCH 4/4] Run DFlare on the V2 GPU model runner
+
+---
+ vllm/config/vllm.py                           | 11 ++++----
+ vllm/model_executor/models/qwen3_dflare.py    | 18 +++++++------
+ vllm/v1/worker/gpu/model_runner.py            |  7 +++++-
+ vllm/v1/worker/gpu/spec_decode/__init__.py    |  2 +-
+ .../gpu/spec_decode/dflash/speculator.py      | 25 +++++++++++++++----
+ 5 files changed, 43 insertions(+), 20 deletions(-)
+
+diff --git a/vllm/config/vllm.py b/vllm/config/vllm.py
+index a7f185cad..07b16d9f3 100644
+--- a/vllm/config/vllm.py
++++ b/vllm/config/vllm.py
+@@ -567,7 +567,7 @@ class VllmConfig:
+         ):
+             return True
+ 
+-        # Mixed sliding/full DFlash drafts need multiple KV groups (V2 only);
++        # Mixed sliding/full DFlash-family drafts need multiple KV groups (V2 only);
+         # force V2 as for dspark, since a hybrid target otherwise defaults to V1.
+         if self._dflash_needs_multi_kv_group():
+             return True
+@@ -598,7 +598,7 @@ class VllmConfig:
+     def _dflash_needs_multi_kv_group(self) -> bool:
+         """Whether a DFlash draft mixes sliding-window and full attention."""
+         spec = self.speculative_config
+-        if spec is None or spec.method != "dflash":
++        if spec is None or spec.method not in ("dflash", "dflare"):
+             return False
+         draft_config = getattr(spec, "draft_model_config", None)
+         if draft_config is None:
+@@ -2165,16 +2165,17 @@ class VllmConfig:
+                 "eagle3",
+                 "mtp",
+                 "dflash",
++                "dflare",
+                 "dspark",
+             ):
+                 unsupported.append(f"speculative method '{speculative_config.method}'")
+ 
+             # V2 EagleSpeculator does not support parallel_drafting (for P-Eagle).
+-            # DFlash and DSpark use parallel drafting natively in V2 via their
+-            # own speculators.
++            # DFlash, DFlare, and DSpark use parallel drafting natively in V2
++            # via their own speculators.
+             if (
+                 speculative_config.parallel_drafting
+-                and speculative_config.method not in ("dflash", "dspark")
++                and speculative_config.method not in ("dflash", "dflare", "dspark")
+             ):
+                 unsupported.append("parallel drafting for EAGLE speculative decoding")
+ 
+diff --git a/vllm/model_executor/models/qwen3_dflare.py b/vllm/model_executor/models/qwen3_dflare.py
+index 691277487..8e3862718 100644
+--- a/vllm/model_executor/models/qwen3_dflare.py
++++ b/vllm/model_executor/models/qwen3_dflare.py
+@@ -259,7 +259,7 @@ class DFlareQwen3Model(DFlashQwen3Model):
+         self,
+         context_states: torch.Tensor,
+         context_positions: torch.Tensor,
+-        context_slot_mapping: torch.Tensor | None = None,
++        context_slot_mapping: (torch.Tensor | list[torch.Tensor | None] | None) = None,
+     ) -> None:
+         if not hasattr(self, "_num_attn_layers"):
+             self._build_fused_kv_buffers()
+@@ -303,19 +303,23 @@ class DFlareQwen3Model(DFlashQwen3Model):
+             rope_cache,
+             self._rope_is_neox,
+         )
+-        if context_slot_mapping is None:
+-            return
+-
+         final_k = flat_k.view(
+             num_layers, num_context, self._num_kv_heads, self._head_dim
+         )
+         for layer_index, attn in enumerate(self._attn_layers):
++            slot_mapping = (
++                context_slot_mapping[layer_index]
++                if isinstance(context_slot_mapping, list)
++                else context_slot_mapping
++            )
++            if slot_mapping is None:
++                continue
+             attn.impl.do_kv_cache_update(
+                 attn,
+                 final_k[layer_index],
+                 all_v[layer_index],
+                 attn.kv_cache,
+-                context_slot_mapping,
++                slot_mapping,
+             )
+ 
+     def load_weights(self, weights: Iterable[tuple[str, torch.Tensor]]) -> set[str]:
+@@ -359,9 +363,7 @@ class DFlareQwen3ForCausalLM(DFlashQwen3ForCausalLM):
+ 
+     def __init__(self, *, vllm_config: VllmConfig, prefix: str = "") -> None:
+         nn.Module.__init__(self)
+-        self.draft_model_config = (
+-            vllm_config.speculative_config.draft_model_config
+-        )
++        self.draft_model_config = vllm_config.speculative_config.draft_model_config
+         self.config = self.draft_model_config.hf_config
+         if getattr(self.config, "draft_vocab_size", None) is None:
+             self.config.draft_vocab_size = self.config.vocab_size
+diff --git a/vllm/v1/worker/gpu/model_runner.py b/vllm/v1/worker/gpu/model_runner.py
+index f0da049ce..bb52fc1e6 100644
+--- a/vllm/v1/worker/gpu/model_runner.py
++++ b/vllm/v1/worker/gpu/model_runner.py
+@@ -205,7 +205,12 @@ class GPUModelRunner(LoRAModelRunnerMixin):
+             if self.is_last_pp_rank:
+                 self.speculator = init_speculator(self.vllm_config, self.device)
+ 
+-            if self.speculative_config.method in ("eagle3", "dflash", "dspark"):
++            if self.speculative_config.method in (
++                "eagle3",
++                "dflash",
++                "dflare",
++                "dspark",
++            ):
+                 # Drafting may require auxiliary hidden states from target model outputs
+                 self.use_aux_hidden_state_outputs = True
+                 if self.use_pp:
+diff --git a/vllm/v1/worker/gpu/spec_decode/__init__.py b/vllm/v1/worker/gpu/spec_decode/__init__.py
+index c70f169f7..12233ed94 100644
+--- a/vllm/v1/worker/gpu/spec_decode/__init__.py
++++ b/vllm/v1/worker/gpu/spec_decode/__init__.py
+@@ -8,7 +8,7 @@ from vllm.config import VllmConfig
+ def init_speculator(vllm_config: VllmConfig, device: torch.device):
+     speculative_config = vllm_config.speculative_config
+     assert speculative_config is not None
+-    if speculative_config.method == "dflash":
++    if speculative_config.method in ("dflash", "dflare"):
+         from vllm.v1.worker.gpu.spec_decode.dflash.speculator import (
+             DFlashSpeculator,
+         )
+diff --git a/vllm/v1/worker/gpu/spec_decode/dflash/speculator.py b/vllm/v1/worker/gpu/spec_decode/dflash/speculator.py
+index 645469e61..7dd04bbeb 100644
+--- a/vllm/v1/worker/gpu/spec_decode/dflash/speculator.py
++++ b/vllm/v1/worker/gpu/spec_decode/dflash/speculator.py
+@@ -337,12 +337,27 @@ class DFlashSpeculator(DraftModelSpeculator):
+         # hidden_states the same as the target model's. This means, we pad each
+         # request's query length to include any rejected positions.
+         if aux_hidden_states:
+-            hidden_states = self.model.combine_hidden_states(
++            context_hidden_states = self.model.combine_hidden_states(
+                 torch.cat(aux_hidden_states, dim=-1)
+             )
+         else:
+-            hidden_states = last_hidden_states
+-        self.hidden_states[:num_target_tokens].copy_(hidden_states[:num_target_tokens])
++            context_hidden_states = last_hidden_states
++        if context_hidden_states.ndim == 2:
++            # DFlash and DSpark use one combined target context per token.
++            self.hidden_states[:num_target_tokens].copy_(
++                context_hidden_states[:num_target_tokens]
++            )
++            context_hidden_states = self.hidden_states[:num_target_tokens]
++        elif context_hidden_states.ndim == 3:
++            # DFlare preserves one fused target context per draft layer:
++            # [num_target_tokens, num_draft_layers, hidden_size].  It cannot be
++            # represented by DFlash's two-dimensional staging buffer.
++            context_hidden_states = context_hidden_states[:num_target_tokens]
++        else:
++            raise ValueError(
++                "Combined target hidden states must have rank 2 or 3, got "
++                f"shape {tuple(context_hidden_states.shape)}"
++            )
+ 
+         self._copy_request_inputs(
+             num_reqs,
+@@ -356,7 +371,7 @@ class DFlashSpeculator(DraftModelSpeculator):
+             # Since DFlash needs to build its own attention metadata, we must skip the
+             # preparation in this path and run a minimal forward pass.
+             self.model.precompute_and_store_context_kv(
+-                self.hidden_states[:num_target_tokens],
++                context_hidden_states,
+                 self.context_positions[:num_target_tokens],
+             )
+             # DFlash processes all speculative tokens in one forward pass,
+@@ -415,7 +430,7 @@ class DFlashSpeculator(DraftModelSpeculator):
+         else:
+             context_slots = self._context_slot_mappings[0][:num_target_tokens]
+         self.model.precompute_and_store_context_kv(
+-            self.hidden_states[:num_target_tokens],
++            context_hidden_states,
+             self.context_positions[:num_target_tokens],
+             context_slots,
+         )
+-- 
+2.25.1
+

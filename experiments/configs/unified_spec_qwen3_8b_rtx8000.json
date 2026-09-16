@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "name": "qwen3_8b_unified_spec_rtx8000_fp16_eager",
+  "target_label": "Qwen/Qwen3-8B",
+  "target_revision": "b968826d9c46dd6066d109eabc6255188de91218",
+  "workload_label": "unified_qwen3_8b_v1",
+  "batch_size": 8,
+  "max_tokens": 64,
+  "max_model_len": 512,
+  "warmup_rounds": 2,
+  "repetitions": 3,
+  "seed": 20260916,
+  "gpu_memory_utilization": 0.44,
+  "enforce_eager": true,
+  "methods": [
+    {
+      "name": "ar",
+      "label": "autoregressive",
+      "speculative_method": null,
+      "num_speculative_tokens": 0,
+      "draft_revision": null
+    },
+    {
+      "name": "eagle3",
+      "label": "RedHatAI/Qwen3-8B-speculator.eagle3",
+      "speculative_method": "eagle3",
+      "num_speculative_tokens": 7,
+      "draft_revision": "08610ffa01dd9f16731fe8f627b85905b6aa51c4"
+    },
+    {
+      "name": "dflash",
+      "label": "z-lab/Qwen3-8B-DFlash-b16",
+      "speculative_method": "dflash",
+      "num_speculative_tokens": 15,
+      "draft_revision": "9b41424b7109f9c5413454f481b09a82b85333f4"
+    },
+    {
+      "name": "dflare",
+      "label": "AngelSlim/Qwen3-8b-dflare",
+      "speculative_method": "dflare",
+      "num_speculative_tokens": 15,
+      "draft_revision": "55e2c8d86d76ce1e79fa3b8642c7f80091285a82"
+    },
+    {
+      "name": "dspark",
+      "label": "DeepSpec Qwen3-8B DSpark block7",
+      "speculative_method": "dspark",
+      "num_speculative_tokens": 7,
+      "draft_revision": "local-converted-checkpoint"
+    }
+  ]
+}

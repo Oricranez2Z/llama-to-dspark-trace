@@ -1,79 +1,70 @@
-# Experimental vLLM DFlare patch
+# Experimental vLLM integration
 
-This directory carries a source patch, not a fork or a claim of upstream
-support. It adds a small V1 Qwen3 DFlare path by reusing vLLM's existing
-DFlash proposer, rejection sampler, scheduler lookahead, and lossless target
-verification.
+This directory contains portable source patches and the worker used by the
+unified AR/EAGLE3/DFlash/DFlare/DSpark benchmark. It is a learning artifact,
+not a claim of upstream support.
 
-## Compatibility contract
+## Unified V2 patch contract
 
 | Item | Value |
 |---|---|
-| vLLM base | `0fc695fc6d1d82e9a5ac6835ac8e4e1c83703665` |
-| lab patch commit | `055065dee7c657392129f851e4e8949fa2b65152` |
-| patch SHA-256 | `31a94a535dd500c3b48543047f3834b4a5ebd61e925a99fcae4aaa03288dd032` |
-| target | `Qwen/Qwen3-4B@1cfa9a7` |
-| draft | `AngelSlim/Qwen3-4b-dflare@71dcbb0` |
-| verified path | V1, CUDA, TP=1, greedy, eager execution |
+| vLLM base | `ff6173997d54c5027971df8ecd1280f046a832b3` |
+| patched revision | `7160b69e68eca230d26e6e72dbc72c3886741799` |
+| patch directory | `patches/unified/` |
+| target | `Qwen/Qwen3-8B@b968826d9c46dd6066d109eabc6255188de91218` |
+| verified path | V2 GPU runner, CUDA, TP=1, greedy, eager, FP16 |
 
-The patch was exported with `git format-patch` and independently applied to a
-clean worktree at the base commit.
-
-## Apply
-
-From a clean vLLM checkout:
+Apply the four commits to a clean branch or worktree:
 
 ```bash
-git checkout 0fc695fc6d1d82e9a5ac6835ac8e4e1c83703665
-git am <LLM_SERVING_LAB>/integrations/vllm/patches/0001-Add-experimental-Qwen3-DFlare-V1-support.patch
+git checkout ff6173997d54c5027971df8ecd1280f046a832b3
+git am <LLM_SERVING_LAB>/integrations/vllm/patches/unified/*.patch
 git rev-parse HEAD
 ```
 
-The resulting commit hash may differ because Git records committer metadata.
-Confirm the patch itself with:
-
-```bash
-sha256sum <LLM_SERVING_LAB>/integrations/vllm/patches/*.patch
-```
-
-Do not apply this patch over unrelated local changes. Use a branch or a Git
-worktree so the source revision and result provenance stay auditable.
-
-## What changes
-
-- Registers `QwenDFlareDraftModel` and loads its checkpoint mapping.
-- Computes a distinct learned target-hidden-state fusion for every draft layer.
-- Adds separate target-context K/V projections required by the checkpoint.
-- Collects nine configured target auxiliary hidden states.
-- Routes DFlare through the existing DFlash block proposer and verifier.
-- Reserves the same extra scheduler lookahead slot as DFlash.
-
-This is deliberately V1 scope. It does not implement production serving
-benchmarks, distributed execution, CUDA graphs, quantization, or sampling-mode
-coverage.
-
-## Tests run
+Patch SHA-256 values:
 
 ```text
-ruff check (all changed vLLM files): passed
-tests/models/test_qwen3_dflare.py: 2 passed
-clean git-am application: passed
-RTX 8000 FP16 end-to-end smoke: passed
-AR versus DFlare token IDs: 3/3 requests matched
+55381557540d89b24f9c587425870d16db396792e7671a7c7c0393312939aa35  0001
+fe981864301eb8bf3d3bcbdb0f6cf1a35d08e617eb975da7f5129acb0cb13545  0002
+81869fca8f08b34ef81915808fe87e1a65abd6cc8241db4dcd3dd1e667232707  0003
+86aa2a9d71e756aeef945a60f5c4ce947da5aa5aefeceaa2041202dba97c9f26  0004
 ```
 
-An existing upstream DFlash lookahead test attempted to resolve an online 8B
-model and stopped at restricted network access before exercising patch logic.
-It is therefore recorded as unexecuted, not as a pass or regression.
+The series registers Qwen3 DFlare, loads its released checkpoints, accepts the
+native DSpark mask-token config, and gives DFlare a V2 DFlash-family execution
+path. DFlare retains one fused target context per draft layer and inserts each
+layer into its own KV-cache slot mapping.
 
-## Scope warning
+The worker `unified_spec_worker.py` deliberately runs only one method per
+process. It fixes dtype, runner, target, tokenizer, prompt rendering, sampling,
+batch size, eager mode, prefix-cache setting, and trace collection. The outer
+runner validates hashes and performs AR equality checks.
 
-The earlier upstream DFlare PR
-[#49023](https://github.com/vllm-project/vllm/pull/49023) was closed without
-merge after maintainers reported difficulty reproducing its ablations. This
-lab patch is adapted and attributed to that work, then adjusted to the pinned
-local V1 revision. It is a learning and validation artifact, not evidence that
-vLLM officially supports DFlare or that DFlare universally outperforms DFlash.
+## Validation performed
 
-See [stage 7](../../reports/dflare/stage-07-vllm-patch.md) for the measured
-smoke and the RTX 4090 validation gate.
+```text
+vLLM changed-file Ruff checks: passed
+vLLM DFlare model tests: 3 passed
+main repository tests: 30 passed
+five-method V2 smoke: passed; all tokens matched AR
+formal RTX 8000 run: all methods matched AR through EOS
+vLLM result commit: clean
+```
+
+The RTX 8000 comparison is provisional because another process used the GPU.
+That limitation is stored in `summary.json`, not left as prose only.
+
+## Scope
+
+Supported and measured: Qwen3-8B, CUDA, TP=1, eager, FP16, greedy offline
+batches. Not established: CUDA graphs, online request arrivals, quantization,
+pipeline/tensor parallelism above one, multi-node execution, or other model
+families.
+
+The older single-file patch in `patches/` is retained for the historical
+Qwen3-4B V1 smoke. New comparison work should use the unified patch series.
+
+The original DFlare implementation was adapted from vLLM pull request #49023
+with attribution retained in Git history. That proposal was not merged; this
+repository therefore describes DFlare support as experimental.

@@ -56,3 +56,17 @@ committed to this repository.
 
 Model checkpoints, datasets, and generated outputs remain subject to their own
 licenses and usage terms. They are not redistributed here.
+
+## Unified speculative comparison
+
+- vLLM base: `ff6173997d54c5027971df8ecd1280f046a832b3`
+- patched revision: `7160b69e68eca230d26e6e72dbc72c3886741799`
+- target: `Qwen/Qwen3-8B@b968826d9c46dd6066d109eabc6255188de91218`
+- EAGLE3: `RedHatAI/Qwen3-8B-speculator.eagle3@08610ffa01dd9f16731fe8f627b85905b6aa51c4`
+- DFlash: `z-lab/Qwen3-8B-DFlash-b16@9b41424b7109f9c5413454f481b09a82b85333f4`
+- DFlare: `AngelSlim/Qwen3-8b-dflare@55e2c8d86d76ce1e79fa3b8642c7f80091285a82`
+- DSpark: a local conversion of the DeepSpec Qwen3-8B block-7 checkpoint;
+  weights are not redistributed
+
+The formatted Apache-2.0-compatible source patch series is stored in
+`integrations/vllm/patches/unified/`.

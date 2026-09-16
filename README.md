@@ -4,11 +4,12 @@ An educational, executable path from **single-token generation** to
 **continuous batching**, **paged KV-cache management**, and
 **speculative decoding**.
 
-The project combines three kinds of evidence:
+The project combines four kinds of evidence:
 
 - Original, minimal implementations of the core mechanisms.
 - Execution traces that make state transitions visible.
 - Source-level maps to pinned llama2.c, vLLM, and DeepSpec revisions.
+- A controlled vLLM V2 comparison of AR, EAGLE3, DFlash, DFlare, and DSpark.
 
 It is designed for learning and systems interviews. It is not a replacement
 for a production inference engine.
@@ -60,6 +61,8 @@ flowchart LR
 - Rejected-suffix handling and bonus tokens.
 - A load-aware confidence scheduler inspired by DSpark.
 - Fixed-length and confidence-scheduled simulation experiments.
+- One typed benchmark contract shared by AR, EAGLE3, DFlash, DFlare, and
+  DSpark, with workload fingerprints and AR token equality gates.
 
 ### DFlare learning track
 
@@ -67,7 +70,8 @@ flowchart LR
 - Masked block proposal connected to the same lossless greedy verifier.
 - Normalized round traces covering proposal, acceptance, rejection, and commit.
 - Isolated AngelSlim runner for official Qwen3-4B DFlare/DFlash checkpoints.
-- Portable experimental vLLM V1 patch with an RTX 8000 end-to-end smoke.
+- Portable experimental vLLM V1/V2 patch series with RTX 8000 end-to-end
+  execution.
 
 ### Framework tracing
 
@@ -134,10 +138,32 @@ Curated examples:
 - [Measured vLLM scheduler trace](results/figures/vllm_scheduler_trace.svg)
 - [Measured DSpark verification rounds](results/figures/dspark_verification_rounds.svg)
 - [Measured AR/DFlash/DFlare comparison](results/figures/dflare_rtx8000_fp16_comparison.svg)
+- [Unified AR/EAGLE3/DFlash/DFlare/DSpark comparison](results/figures/unified_spec_qwen3_8b_rtx8000_fp16.svg)
 - [Sample scheduler trace](results/sample_traces/scheduler_trace.jsonl)
 - [Sample speculative summary](results/sample_traces/speculative_summary.json)
 
-## Measured GPU smoke tests
+## Unified local GPU comparison
+
+The primary comparison now runs all five methods through one clean vLLM
+revision, one Qwen3-8B target, one immutable workload, one V2 GPU model runner,
+and one trace schema. The checked-in RTX 8000 run is lossless through EOS for
+every method.
+
+| Method | K | Median output tok/s | vs AR | committed/step |
+|---|---:|---:|---:|---:|
+| AR | 0 | 122.74 | 1.000× | 1.016 |
+| EAGLE3 | 7 | 133.35 | 1.086× | 1.730 |
+| DFlash | 15 | 68.66 | 0.559× | 1.016 |
+| DFlare | 15 | 161.06 | 1.312× | 2.133 |
+| DSpark | 7 | 204.76 | 1.668× | 2.560 |
+
+This table is deliberately marked **provisional**: another process occupied
+25.6 GiB and 57–100% GPU utilization during the run. The machine-readable
+result sets `benchmark_claim=false`; use it to validate the comparison path,
+not as a headline speed claim. See the [stage report](reports/unified/stage-03-rtx8000-results.md)
+and [unified protocol](docs/11_unified_speculative_benchmark.md).
+
+## Earlier GPU smoke tests
 
 The repository includes small, reproducible GPU artifacts recorded on a
 Quadro RTX 8000. They validate the instrumentation path; they are not production
@@ -163,7 +189,8 @@ The local study was performed against these immutable revisions:
 | vllm-project/vllm | `ff6173997` | Scheduler, paged KV cache, model runner, serving |
 | DeepSpec | `005e03b` | DSpark draft and verification reference path |
 | Tencent/AngelSlim | `ee8ddb2b` | DFlare/DFlash model and offline verifier reference |
-| vLLM DFlare patch base | `0fc695fc6` | Experimental V1 model/proposer integration |
+| unified vLLM patch base | `ff6173997` | Common V2 AR/speculative runtime |
+| unified vLLM patched | `7160b69e6` | DFlare + native DSpark comparison path |
 
 The implementation does not copy these projects. See
 [third-party attribution](third_party/README.md) and the detailed
@@ -179,10 +206,12 @@ src/llm_serving_lab/dflare/          Educational fusion and block proposal
 src/llm_serving_lab/tracing/        JSONL schema and framework adapters
 integrations/                        Isolated AngelSlim runner and vLLM patch
 experiments/                        Reproducible CPU and opt-in GPU experiments
+src/llm_serving_lab/benchmark/       Unified comparison contract and aggregation
 visualization/                      Dependency-free SVG generators
 tests/                              Correctness and invariant tests
 docs/                               Execution-level explanations
 reports/dflare/                      Saved stage-by-stage engineering reports
+reports/unified/                     Unified framework and benchmark reports
 results/                             Curated sample traces and measured smokes
 ```
 
@@ -210,7 +239,7 @@ project into the same environment. Run:
 
 ```bash
 VLLM_ENABLE_V1_MULTIPROCESSING=0 \
-VLLM_USE_V2_MODEL_RUNNER=0 \
+VLLM_USE_V2_MODEL_RUNNER=1 \
 python examples/trace_vllm.py \
   --model Qwen/Qwen3-8B \
   --output results/generated/vllm_trace.jsonl
@@ -265,6 +294,8 @@ speedup. A full measurement matrix is provided in
 - [GitHub publishing checklist](docs/08_github_publishing.md)
 - [Resume presentation](docs/09_resume_presentation.md)
 - [GPU reproduction guide](docs/10_gpu_reproduction.md)
+- [Unified speculative benchmark](docs/11_unified_speculative_benchmark.md)
+- [Unified comparison stage reports](reports/unified/)
 
 ## License
 

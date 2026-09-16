@@ -38,9 +38,15 @@ measured/vllm_ar_rtx8000_fp16_control/
 measured/vllm_dflare_patch_rtx8000_fp16_smoke/
     Same-prompt AR control and experimental patched-vLLM DFlare smoke.
 
+measured/unified_spec_qwen3_8b_rtx8000_fp16/
+    Common vLLM V2 AR/EAGLE3/DFlash/DFlare/DSpark results. The summary records
+    both EOS-bounded and strict fixed-length equality plus pre-method GPU
+    contention snapshots.
+
 figures/vllm_scheduler_trace.svg
 figures/dspark_verification_rounds.svg
 figures/dflare_rtx8000_fp16_comparison.svg
+figures/unified_spec_qwen3_8b_rtx8000_fp16.svg
     Visual summaries generated from the measured traces.
 ```
 
@@ -49,8 +55,10 @@ Regenerate them with:
 ```bash
 make samples
 make compare-dflare
+make plot-unified
 ```
 
-These artifacts are not GPU benchmarks and must not be presented as measured
-vLLM, DSpark, DFlash, or DFlare speedups. The GPU directories are measured smoke tests, but their
-tiny workloads are not statistically meaningful performance comparisons.
+The unified directory is a controlled measured comparison, but its checked-in
+RTX 8000 run detected a competing GPU workload and therefore records
+`benchmark_claim=false`. Earlier GPU directories are integration smokes and
+must not be presented as comparative speedups.

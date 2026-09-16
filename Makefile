@@ -1,4 +1,4 @@
-.PHONY: setup test lint demo demo-spec demo-dflare compare-dflare visualize visualize-measured samples clean
+.PHONY: setup test lint demo demo-spec demo-dflare compare-dflare plot-unified visualize visualize-measured samples clean
 
 setup:
 	uv sync --extra dev
@@ -33,6 +33,11 @@ compare-dflare:
 	uv run python visualization/plot_dflare_comparison.py \
 		results/measured/dflare_comparison_rtx8000_fp16.json \
 		results/figures/dflare_rtx8000_fp16_comparison.svg
+
+plot-unified:
+	uv run python visualization/plot_unified_spec_comparison.py \
+		results/measured/unified_spec_qwen3_8b_rtx8000_fp16/summary.json \
+		results/figures/unified_spec_qwen3_8b_rtx8000_fp16.svg
 
 visualize: demo demo-spec
 	uv run python visualization/plot_request_timeline.py \

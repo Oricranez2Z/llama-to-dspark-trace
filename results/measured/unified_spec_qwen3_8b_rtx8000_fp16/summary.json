@@ -1,0 +1,223 @@
+{
+  "schema_version": 1,
+  "mode": "unified_vllm_offline_batch",
+  "benchmark_claim": false,
+  "benchmark_fingerprint": "11337a189057b2d4f52cc11f08af387c8447325d0f8d9655a44d1f061f6307cf",
+  "workload_sha256": "b00ebe2c336017df65181edbe83c6409b86b5c21a8170c97656bfbab4b5d03d7",
+  "target": {
+    "label": "Qwen/Qwen3-8B",
+    "revision": "b968826d9c46dd6066d109eabc6255188de91218"
+  },
+  "controlled_conditions": {
+    "workload": "unified_qwen3_8b_v1",
+    "batch_size": 8,
+    "max_tokens": 64,
+    "max_model_len": 512,
+    "warmup_rounds": 2,
+    "repetitions": 3,
+    "temperature": 0,
+    "ignore_eos": true,
+    "seed": 20260916,
+    "enforce_eager": true,
+    "prefix_caching": false
+  },
+  "methods": [
+    {
+      "method": "ar",
+      "label": "autoregressive",
+      "num_speculative_tokens": 0,
+      "median_batch_seconds": 4.171255631372333,
+      "median_output_tokens_per_second": 122.74481481048748,
+      "speedup_vs_ar": 1.0,
+      "exact_match_ar": true,
+      "exact_match_ar_full_length": true,
+      "exact_match_ar_until_stop": true,
+      "stable_across_repetitions": true,
+      "mean_committed_tokens_per_decode_step": 1.0158730158730158,
+      "batch_seconds": [
+        4.219036363065243,
+        4.171255631372333,
+        4.129664724692702
+      ]
+    },
+    {
+      "method": "eagle3",
+      "label": "RedHatAI/Qwen3-8B-speculator.eagle3",
+      "num_speculative_tokens": 7,
+      "median_batch_seconds": 3.8395804092288017,
+      "median_output_tokens_per_second": 133.34790404945255,
+      "speedup_vs_ar": 1.0863831947226101,
+      "exact_match_ar": false,
+      "exact_match_ar_full_length": false,
+      "exact_match_ar_until_stop": true,
+      "stable_across_repetitions": true,
+      "mean_committed_tokens_per_decode_step": 1.7297297297297298,
+      "batch_seconds": [
+        3.8408318404108286,
+        3.8395804092288017,
+        3.8379161320626736
+      ]
+    },
+    {
+      "method": "dflash",
+      "label": "z-lab/Qwen3-8B-DFlash-b16",
+      "num_speculative_tokens": 15,
+      "median_batch_seconds": 7.456740455701947,
+      "median_output_tokens_per_second": 68.66270900021588,
+      "speedup_vs_ar": 0.5593939679344341,
+      "exact_match_ar": true,
+      "exact_match_ar_full_length": true,
+      "exact_match_ar_until_stop": true,
+      "stable_across_repetitions": true,
+      "mean_committed_tokens_per_decode_step": 1.0158730158730158,
+      "batch_seconds": [
+        7.46275114826858,
+        7.456740455701947,
+        7.447766931727529
+      ]
+    },
+    {
+      "method": "dflare",
+      "label": "AngelSlim/Qwen3-8b-dflare",
+      "num_speculative_tokens": 15,
+      "median_batch_seconds": 3.178953992202878,
+      "median_output_tokens_per_second": 161.0592670594789,
+      "speedup_vs_ar": 1.3121472162237342,
+      "exact_match_ar": true,
+      "exact_match_ar_full_length": true,
+      "exact_match_ar_until_stop": true,
+      "stable_across_repetitions": true,
+      "mean_committed_tokens_per_decode_step": 2.1333333333333333,
+      "batch_seconds": [
+        3.179203238338232,
+        3.178953992202878,
+        3.178908606991172
+      ]
+    },
+    {
+      "method": "dspark",
+      "label": "DeepSpec Qwen3-8B DSpark block7",
+      "num_speculative_tokens": 7,
+      "median_batch_seconds": 2.5005226507782936,
+      "median_output_tokens_per_second": 204.75719339740385,
+      "speedup_vs_ar": 1.6681535078572551,
+      "exact_match_ar": false,
+      "exact_match_ar_full_length": false,
+      "exact_match_ar_until_stop": true,
+      "stable_across_repetitions": true,
+      "mean_committed_tokens_per_decode_step": 2.56,
+      "batch_seconds": [
+        2.5004983488470316,
+        2.5019819028675556,
+        2.5005226507782936
+      ]
+    }
+  ],
+  "all_speculative_outputs_match_ar": false,
+  "all_speculative_outputs_match_ar_full_length": false,
+  "all_speculative_outputs_match_ar_until_stop": true,
+  "environment": {
+    "gpu": "Quadro RTX 8000",
+    "compute_capability": "7.5",
+    "gpu_memory_bytes": 50756386816,
+    "driver": "560.35.03",
+    "python": "3.12.13",
+    "torch": "2.11.0+cu129",
+    "torch_cuda": "12.9",
+    "vllm": "0.23.1.dev0+g0fc695fc6.d20260806",
+    "vllm_source": {
+      "commit": "7160b69e68eca230d26e6e72dbc72c3886741799",
+      "dirty": false
+    },
+    "model_runner": "v2",
+    "requested_dtype": "float16",
+    "effective_target_dtype": "torch.float16",
+    "enforce_eager": true,
+    "engine_seed": 20260916,
+    "attention_backend_request": "auto"
+  },
+  "notes": [
+    "All methods use one vLLM source revision and one target checkpoint.",
+    "Proposal lengths remain checkpoint-native and are reported per method.",
+    "Lossless correctness is gated through the first EOS token; strict fixed-length equality is also reported because ignore_eos=True.",
+    "Results describe this fixed offline batch on this GPU, not online serving."
+  ],
+  "execution_order": [
+    "eagle3",
+    "dflash",
+    "dspark",
+    "dflare",
+    "ar"
+  ],
+  "physical_gpu_index": "0",
+  "pre_method_gpu_snapshots": {
+    "eagle3": {
+      "physical_index": 0,
+      "uuid": "GPU-72227447-a186-9e24-ff0c-611af386c1f9",
+      "name": "Quadro RTX 8000",
+      "memory_used_mib": 25670,
+      "memory_free_mib": 22736,
+      "utilization_percent": 57,
+      "external_compute_process_count": 2,
+      "external_compute_memory_mib": 25666,
+      "contention_detected": true
+    },
+    "dflash": {
+      "physical_index": 0,
+      "uuid": "GPU-72227447-a186-9e24-ff0c-611af386c1f9",
+      "name": "Quadro RTX 8000",
+      "memory_used_mib": 25670,
+      "memory_free_mib": 22736,
+      "utilization_percent": 90,
+      "external_compute_process_count": 2,
+      "external_compute_memory_mib": 25666,
+      "contention_detected": true
+    },
+    "dspark": {
+      "physical_index": 0,
+      "uuid": "GPU-72227447-a186-9e24-ff0c-611af386c1f9",
+      "name": "Quadro RTX 8000",
+      "memory_used_mib": 25670,
+      "memory_free_mib": 22736,
+      "utilization_percent": 82,
+      "external_compute_process_count": 2,
+      "external_compute_memory_mib": 25666,
+      "contention_detected": true
+    },
+    "dflare": {
+      "physical_index": 0,
+      "uuid": "GPU-72227447-a186-9e24-ff0c-611af386c1f9",
+      "name": "Quadro RTX 8000",
+      "memory_used_mib": 25670,
+      "memory_free_mib": 22736,
+      "utilization_percent": 100,
+      "external_compute_process_count": 2,
+      "external_compute_memory_mib": 25666,
+      "contention_detected": true
+    },
+    "ar": {
+      "physical_index": 0,
+      "uuid": "GPU-72227447-a186-9e24-ff0c-611af386c1f9",
+      "name": "Quadro RTX 8000",
+      "memory_used_mib": 25670,
+      "memory_free_mib": 22736,
+      "utilization_percent": 57,
+      "external_compute_process_count": 2,
+      "external_compute_memory_mib": 25666,
+      "contention_detected": true
+    }
+  },
+  "measurement_validity": {
+    "status": "provisional_shared_gpu",
+    "contention_detected": true,
+    "benchmark_claim": false,
+    "definition": "contention when pre-method GPU utilization exceeds 5% or external compute allocations exceed 512 MiB"
+  },
+  "artifacts": {
+    "ar": "methods/ar/result.json",
+    "eagle3": "methods/eagle3/result.json",
+    "dflash": "methods/dflash/result.json",
+    "dflare": "methods/dflare/result.json",
+    "dspark": "methods/dspark/result.json"
+  }
+}

@@ -14,7 +14,18 @@ The scheduler experiment varies prompt/output lengths and records every engine
 step. The speculative experiment sweeps fixed draft lengths and concurrency for
 the confidence policy.
 
-## Checked-in GPU smoke tests
+## Primary unified comparison
+
+Use `docs/11_unified_speculative_benchmark.md` for the common AR, EAGLE3,
+DFlash, DFlare, and DSpark protocol. Unlike the historical smokes below, it
+pins the same target, workload, precision, runner, process isolation, timing,
+trace, and correctness rules for every method.
+
+The runner records GPU state before every method. Any pre-existing utilization
+above 5% or external compute allocation above 512 MiB makes the result
+provisional and sets `benchmark_claim=false`.
+
+## Historical GPU smoke tests
 
 `results/measured/` contains a traced vLLM offline batch and a one-sample
 DeepSpec DSpark evaluation. Use them to verify environment capture, source
@@ -25,14 +36,14 @@ Reproduction commands are in `docs/10_gpu_reproduction.md`.
 
 ## GPU experiment matrix
 
-For real vLLM/DSpark measurements, use at least:
+For a broader serving study after the fixed comparison passes, use at least:
 
 | Dimension | Suggested values |
 |---|---|
 | Input length | 128, 512, 2048 |
 | Output length | 32, 128, 512 |
 | Concurrency | 1, 4, 8, 16, 32 |
-| Method | AR, fixed speculative, DSpark |
+| Method | AR, EAGLE3, DFlash, DFlare, DSpark |
 | Draft length | 2, 4, 6, 8 |
 
 Record:

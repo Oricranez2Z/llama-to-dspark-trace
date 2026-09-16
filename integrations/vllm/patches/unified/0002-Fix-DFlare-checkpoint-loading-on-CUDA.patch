@@ -1,0 +1,116 @@
+From 255ea4ff2a2d691f39c0f5a08ea87ff27a546fa8 Mon Sep 17 00:00:00 2001
+From: Oricrane <oricranez2z@gmail.com>
+Date: Wed, 16 Sep 2026 15:26:52 +0800
+Subject: [PATCH 2/4] Fix DFlare checkpoint loading on CUDA
+
+Add a minimal stable-extension build mode for older CUDA GPUs and preserve the DFlash mask-token loader contract in the DFlare model.
+
+Assisted-by: OpenAI Codex
+---
+ CMakeLists.txt                             | 35 ++++++++++++----------
+ tests/models/test_qwen3_dflare.py          | 18 +++++++++++
+ vllm/model_executor/models/qwen3_dflare.py | 11 ++++++-
+ 3 files changed, 48 insertions(+), 16 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 9bd73f18e..20d3e37bd 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1402,19 +1402,24 @@ if (VLLM_GPU_LANG STREQUAL "HIP")
+   vllm_finalize_hipify_target()
+ endif()
+ 
+-# For CUDA and HIP builds also build the triton_kernels external package.
+-if(VLLM_GPU_LANG STREQUAL "CUDA" OR VLLM_GPU_LANG STREQUAL "HIP")
+-    include(cmake/external_projects/triton_kernels.cmake)
+-endif()
++option(VLLM_MINIMAL_STABLE_ONLY
++  "Skip optional external projects when building _C_stable_libtorch only" OFF)
+ 
+-# For CUDA we also build and ship some external projects.
+-if (VLLM_GPU_LANG STREQUAL "CUDA")
+-    include(cmake/external_projects/deepgemm.cmake)
+-    include(cmake/external_projects/fmha_sm100.cmake)
+-    include(cmake/external_projects/flashmla.cmake)
+-    include(cmake/external_projects/qutlass.cmake)
+-    include(cmake/external_projects/tml_fa4.cmake)
+-
+-    # vllm-flash-attn should be last as it overwrites some CMake functions
+-    include(cmake/external_projects/vllm_flash_attn.cmake)
+-endif ()
++if(NOT VLLM_MINIMAL_STABLE_ONLY)
++  # For CUDA and HIP builds also build the triton_kernels external package.
++  if(VLLM_GPU_LANG STREQUAL "CUDA" OR VLLM_GPU_LANG STREQUAL "HIP")
++      include(cmake/external_projects/triton_kernels.cmake)
++  endif()
++
++  # For CUDA we also build and ship some external projects.
++  if (VLLM_GPU_LANG STREQUAL "CUDA")
++      include(cmake/external_projects/deepgemm.cmake)
++      include(cmake/external_projects/fmha_sm100.cmake)
++      include(cmake/external_projects/flashmla.cmake)
++      include(cmake/external_projects/qutlass.cmake)
++      include(cmake/external_projects/tml_fa4.cmake)
++
++      # vllm-flash-attn should be last as it overwrites some CMake functions
++      include(cmake/external_projects/vllm_flash_attn.cmake)
++  endif ()
++endif()
+diff --git a/tests/models/test_qwen3_dflare.py b/tests/models/test_qwen3_dflare.py
+index ea70021de..46ab3888d 100644
+--- a/tests/models/test_qwen3_dflare.py
++++ b/tests/models/test_qwen3_dflare.py
+@@ -43,3 +43,21 @@ def test_dflare_eagle_wrapper_preserves_checkpoint_contract() -> None:
+ 
+     assert wrapped.architectures == ["QwenDFlareDraftModel"]
+     assert wrapped.eagle_aux_hidden_state_layer_ids == [2, 6, 10]
++
++
++def test_dflare_mask_token_uses_dflash_embedding_contract() -> None:
++    model = DFlareQwen3Model.__new__(DFlareQwen3Model)
++    nn.Module.__init__(model)
++    model.config = SimpleNamespace(
++        hidden_size=2,
++        dflash_config={"mask_token_id": 7},
++    )
++    model.mask_token_id = model.dflare_config.get("mask_token_id")
++    model.mask_embedding = nn.Parameter(torch.zeros(2), requires_grad=False)
++    model.has_separate_mask_embedding = False
++    model.embed_tokens = nn.Embedding(8, 2)
++
++    embedded = model.embed_input_ids(torch.tensor([7]))
++
++    assert model.mask_token_id == 7
++    torch.testing.assert_close(embedded, model.embed_tokens(torch.tensor([7])))
+diff --git a/vllm/model_executor/models/qwen3_dflare.py b/vllm/model_executor/models/qwen3_dflare.py
+index 1dd288b3a..691277487 100644
+--- a/vllm/model_executor/models/qwen3_dflare.py
++++ b/vllm/model_executor/models/qwen3_dflare.py
+@@ -169,6 +169,12 @@ class DFlareQwen3Model(DFlashQwen3Model):
+             self.config.hidden_size,
+             prefix=maybe_prefix(prefix, "embed_tokens"),
+         )
++        self.mask_token_id = self.dflare_config.get("mask_token_id")
++        self.mask_embedding = nn.Parameter(
++            torch.zeros(self.config.hidden_size, dtype=vllm_config.model_config.dtype),
++            requires_grad=False,
++        )
++        self.has_separate_mask_embedding = False
+         current = get_current_vllm_config()
+         self.layers = nn.ModuleList(
+             [
+@@ -353,7 +359,10 @@ class DFlareQwen3ForCausalLM(DFlashQwen3ForCausalLM):
+ 
+     def __init__(self, *, vllm_config: VllmConfig, prefix: str = "") -> None:
+         nn.Module.__init__(self)
+-        self.config = vllm_config.speculative_config.draft_model_config.hf_config
++        self.draft_model_config = (
++            vllm_config.speculative_config.draft_model_config
++        )
++        self.config = self.draft_model_config.hf_config
+         if getattr(self.config, "draft_vocab_size", None) is None:
+             self.config.draft_vocab_size = self.config.vocab_size
+         target_layer_num = vllm_config.model_config.get_num_layers(
+-- 
+2.25.1
+
