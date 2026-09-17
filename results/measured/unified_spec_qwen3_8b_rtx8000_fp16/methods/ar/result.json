@@ -1,13 +1,15 @@
 {
   "schema_version": 1,
-  "benchmark_fingerprint": "11337a189057b2d4f52cc11f08af387c8447325d0f8d9655a44d1f061f6307cf",
+  "benchmark_fingerprint": "9da24855f55f160155da4778a4420323b7dbf3f951224a834bc30a23ec9f3e7d",
   "workload_sha256": "b00ebe2c336017df65181edbe83c6409b86b5c21a8170c97656bfbab4b5d03d7",
   "method": {
     "name": "ar",
     "label": "autoregressive",
     "speculative_method": null,
     "num_speculative_tokens": 0,
-    "draft_revision": null
+    "draft_revision": null,
+    "checkpoint_block_size": null,
+    "block_mode": "native"
   },
   "target": {
     "label": "Qwen/Qwen3-8B",
@@ -23,19 +25,19 @@
     "output_tokens_per_repetition": 512
   },
   "timing": {
-    "engine_init_seconds": 20.84552519954741,
+    "engine_init_seconds": 19.166261849924922,
     "warmup_rounds": 2,
     "repetitions": 3,
     "batch_seconds": [
-      4.219036363065243,
-      4.171255631372333,
-      4.129664724692702
+      2.1625309102237225,
+      2.1685208417475224,
+      2.1683326195925474
     ],
-    "mean_batch_seconds": 4.1733189063767595,
-    "median_batch_seconds": 4.171255631372333,
-    "min_batch_seconds": 4.129664724692702,
-    "max_batch_seconds": 4.219036363065243,
-    "median_output_tokens_per_second": 122.74481481048748
+    "mean_batch_seconds": 2.1664614571879306,
+    "median_batch_seconds": 2.1683326195925474,
+    "min_batch_seconds": 2.1625309102237225,
+    "max_batch_seconds": 2.1685208417475224,
+    "median_output_tokens_per_second": 236.12613460392907
   },
   "correctness": {
     "stable_across_repetitions": true,
@@ -45,8 +47,10 @@
     "nonempty_scheduler_steps": 64,
     "assumed_prefill_steps": 1,
     "decode_steps": 63,
-    "mean_committed_tokens_per_decode_step": 1.0158730158730158,
-    "definition": "output tokens / (post-prefill scheduler steps * request count); all requests use ignore_eos and equal output length"
+    "decode_request_steps": 504,
+    "mean_committed_tokens_per_decode_step": 1.0,
+    "definition": "post-prefill output tokens / active request decode steps; all requests use ignore_eos and equal output length",
+    "speculative_acceptance": null
   },
   "environment": {
     "gpu": "Quadro RTX 8000",

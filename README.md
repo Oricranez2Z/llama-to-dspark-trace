@@ -87,7 +87,7 @@ Python 3.10 or newer is required. The recommended environment manager is
 
 ```bash
 uv sync --extra dev
-uv run pytest
+uv run python -m pytest
 uv run ruff check .
 ```
 
@@ -109,6 +109,262 @@ make visualize
 ```
 
 Generated artifacts are written to `results/generated/`.
+
+## Recommended learning and execution tutorial
+
+Follow the stages in order. Stages 1–9 are the learning path; stage 10 joins
+the mechanisms in one real vLLM experiment. Commands were rerun on 2026-09-17
+with Python 3.12.13 and two Quadro RTX 8000 GPUs. CPU stages need only the
+project environment. GPU stages additionally need the pinned external vLLM or
+DeepSpec environment and local checkpoints; model weights are not stored in
+this repository.
+
+### 1. Install and check the repository
+
+```bash
+cd ~/llm-serving-lab
+uv sync --extra dev
+make test
+uv run ruff check .
+```
+
+Success means all tests pass and Ruff prints `All checks passed!`. The current
+suite contains 37 tests. Use `make test` or `uv run python -m pytest`; do not
+use the bare `uv run pytest` entry point, because its console-script import path
+does not include the repository-level `experiments` package.
+
+### 2. Mini Llama: follow one token through the model
+
+Read `src/llm_serving_lab/mini_llm/` in this order:
+
+```text
+config.py → model.py → cache.py → sampling.py → generate.py
+```
+
+Then run:
+
+```bash
+uv run llm-serving-demo model
+```
+
+The JSON output should contain one `prefill` step followed by three `decode`
+steps. Prefill consumes shape `[1, 3]`; each decode consumes `[1, 1]`, and
+`cache_length_after` increases by one. This is the smallest executable path
+from prompt tokens to sampled tokens.
+
+### 3. Mini Serving: scheduling and Paged KV cache
+
+Read `request.py`, `scheduler.py`, `block_manager.py`, `model_runner.py`, and
+finally `engine.py` under `src/llm_serving_lab/mini_serving/`. Run both the
+compact demo and the trace-producing experiment:
+
+```bash
+uv run llm-serving-demo serving
+make demo
+```
+
+The first command finishes the `short` and `long` requests. The experiment
+writes `results/generated/scheduler_trace.jsonl`; the checked configuration
+finishes requests B, A, and C in nine engine steps. Inspect a few events with:
+
+```bash
+sed -n '1,5p' results/generated/scheduler_trace.jsonl
+```
+
+Look for `request_scheduled`, its prefill/decode phase, physical `block_ids`,
+and logical-to-physical `slot_mapping`.
+
+### 4. Generic speculative decoding
+
+Read `interfaces.py → verifier.py → decoder.py` under
+`src/llm_serving_lab/speculative/`. The proposer may be approximate, but the
+target verifier commits only a correct prefix plus a target/bonus token.
+
+```bash
+uv run llm-serving-demo speculative
+make demo-spec
+```
+
+The compact demo must print `"matches_autoregressive": true`. The experiment
+writes `results/generated/speculative_summary.json`; every fixed-length and
+confidence-scheduled row must also match AR. These are algorithmic target-call
+counts, not measured GPU kernel speedups.
+
+### 5. EAGLE3: autoregressive multi-token drafting
+
+Use EAGLE3 as the first real draft-model design because it preserves an
+autoregressive dependency between proposed tokens. Start from the generic
+verifier above, then follow the EAGLE3 model and proposer paths in the pinned
+vLLM checkout described by `docs/11_unified_speculative_benchmark.md`.
+
+The released DeepSpec Qwen3 checkpoint uses a training-code architecture name.
+Create a vLLM-compatible view that symlinks, rather than copies, its weights:
+
+```bash
+uv run python experiments/prepare_deepspec_checkpoint.py \
+  --source <DEEPSPEC_EAGLE3_SNAPSHOT> \
+  --output <EAGLE3_VLLM_VIEW>
+```
+
+The output directory must contain `config.json`, a symlink to the weights,
+architecture `Eagle3Qwen3ForCausalLM`, and five auxiliary layer IDs. Its actual
+GPU execution is checked together with the other methods in stage 10.
+
+### 6. DFlash: block-parallel proposal
+
+DFlash replaces serial drafting with a masked/block-parallel proposal. Compare
+`SharedFusion` and `DFlashProposer` in `src/llm_serving_lab/dflare/`, then run:
+
+```bash
+make demo-dflare
+```
+
+In `results/generated/dflare_educational.json`, inspect the
+`dflash_shared_fusion` row and require `matches_autoregressive: true`. The
+weights are deliberately random, so a low or zero accepted-token count is not
+a failure and must not be presented as a performance result.
+
+The real block-7 DFlash checkpoint is packaged as `Qwen3DSparkModel` with
+`markov_rank=0`. The unified runner validates this contract and uses the
+compatible anchor-sampling execution layout while retaining the DFlash label.
+
+### 7. DFlare: layer-wise target-feature fusion
+
+Read `features.py → fusion.py → proposal.py` under
+`src/llm_serving_lab/dflare/`. Contrast DFlare's per-draft-layer target context
+with DFlash's shared fusion. The same command from stage 6 writes the
+`dflare_layerwise_fusion` row and a detailed trace:
+
+```bash
+make demo-dflare
+sed -n '1,5p' results/generated/dflare_educational_trace.jsonl
+```
+
+Require lossless equality, then inspect proposal, verification, rejection, and
+commit events. For the real GPU path, the repository applies the patch series
+under `integrations/vllm/patches/unified/`. The available DFlare checkpoint was
+trained with block 16 and is explicitly marked `runtime_truncated` when the
+comparison uses runtime `K=7`.
+
+### 8. DSpark: refinement, confidence, and scheduling
+
+Read `docs/05_dspark_execution.md`, then revisit the `confidence` rows produced
+by `make demo-spec`. They demonstrate how concurrency changes the proposal
+budget. For a one-sample real DeepSpec trace, run:
+
+```bash
+uv run python experiments/run_dspark_gpu_experiment.py \
+  --harness-root <DEEPSPEC_HARNESS> \
+  --target-path <QWEN3_8B_SNAPSHOT> \
+  --draft-path <DSPARK_BLOCK7_SNAPSHOT> \
+  --gpu 0 \
+  --max-samples 1 \
+  --max-new-tokens 8 \
+  --output-dir results/generated/dspark_gpu_smoke
+```
+
+Success produces `result.json` and `trace.rank0.jsonl`. The 2026-09-17 smoke
+loaded `Qwen3DSparkModel`, proposed three seven-token blocks, and reported mean
+acceptance length 3.67. One sample validates execution and trace wiring, not
+throughput or model quality.
+
+### 9. Read traces as execution timelines
+
+Trace visualization is an observation tool used across the earlier stages,
+not a separate decoding algorithm. Generate the CPU figures with:
+
+```bash
+make visualize
+```
+
+This creates:
+
+- `scheduler_timeline.svg`: which requests run prefill or decode at each step;
+- `kv_blocks.svg`: physical KV-block ownership and slot placement;
+- `speculative_acceptance.svg`: accepted draft length versus proposal policy.
+
+Render the checked-in real GPU traces with:
+
+```bash
+make visualize-measured
+make plot-unified
+```
+
+The resulting SVGs cover vLLM scheduling, DSpark verification rounds, and the
+five-method comparison. Each plot is generated from JSON/JSONL artifacts, so
+the result can be audited without rerunning a checkpoint.
+
+### 10. Run all methods under one vLLM contract
+
+Apply the patch series in `integrations/vllm/README.md`, prepare the checkpoint
+views, and execute:
+
+```bash
+PYTHONPATH=$PWD/src <VLLM_PYTHON> \
+  experiments/run_unified_spec_benchmark.py \
+  --python <VLLM_PYTHON> \
+  --vllm-root <PATCHED_VLLM> \
+  --config experiments/configs/unified_spec_qwen3_8b_rtx8000.json \
+  --workload experiments/workloads/unified_qwen3_8b_v1.jsonl \
+  --target-path <QWEN3_8B_SNAPSHOT> \
+  --draft eagle3=<EAGLE3_VLLM_VIEW> \
+  --draft dflash=<DFLASH_BLOCK7_SNAPSHOT> \
+  --draft dflare=<DFLARE_BLOCK16_SNAPSHOT> \
+  --draft dspark=<DSPARK_BLOCK7_SNAPSHOT> \
+  --gpu 0 \
+  --output-dir results/generated/unified_spec_qwen3_8b_rtx8000_fp16
+```
+
+The general runner records contention but does not accept
+`--require-exclusive`; that option belongs to
+`experiments/run_rtx4090_validation.py`. Accept a unified run only when:
+
+```text
+measurement_validity.status == "valid"
+all_speculative_outputs_match_ar_until_stop == true
+every stable_across_repetitions == true
+every speculative num_speculative_tokens == 7
+```
+
+### 11. Move from RTX 8000 to RTX 4090
+
+RTX 8000 is SM75, uses FP16 and the Triton attention fallback in this setup.
+RTX 4090 is SM89 and should use a fresh environment, BF16, and freshly built
+CUDA/Triton/FlashAttention artifacts. Do not copy compiled caches between the
+cards. Run the one-command 4090 validator from
+`docs/11_unified_speculative_benchmark.md`; unlike the general runner it can
+enforce exclusivity with `--require-exclusive` and produces native-width,
+precision-control, and matched-`K=7` lanes.
+
+### 12. Verification record and known issues
+
+| Stage | 2026-09-17 local verification | Evidence |
+|---|---|---|
+| Install/test/lint | passed | 37 tests; Ruff clean |
+| Mini Llama | passed | one prefill + three decode steps |
+| Mini Serving | passed | three requests; nine engine steps; JSONL trace |
+| Generic speculative decoding | passed | every row matches AR |
+| DFlash/DFlare educational model | passed | both use the lossless verifier; trace written |
+| EAGLE3 unified GPU path | passed | stable; lossless through EOS; K=7 |
+| DFlash unified GPU path | passed | 38.43% draft-token acceptance; K=7 |
+| DFlare unified GPU path | passed | 42.10% draft-token acceptance; runtime K=7 |
+| DSpark standalone smoke | passed | one GSM8K sample; mean accepted length 3.67 |
+| DSpark unified GPU path | passed | 45.97% draft-token acceptance; K=7 |
+| Trace/SVG generation | passed | all expected SVG files are non-empty |
+| Unified RTX 8000 run | passed | no contention; all methods stable and lossless to EOS |
+
+Two repository issues were found and fixed during this walkthrough:
+
+1. `uv run pytest` could not import the repository-level `experiments` package;
+   the supported test command and Make target now use `python -m pytest`.
+2. A previous worker's short-lived GPU utilization tail could be mistaken for
+   external contention. The runner now waits for a stable idle snapshot when
+   external compute allocation is below 512 MiB, while preserving immediate
+   rejection of genuinely occupied devices.
+
+Expected RTX 8000 warnings include FlashAttention 2 being unavailable on SM75
+and fallback to Triton attention. The educational DFlash/DFlare acceptance
+numbers come from random weights and are correctness demonstrations only.
 
 ## Example execution trace
 
@@ -149,18 +405,34 @@ revision, one Qwen3-8B target, one immutable workload, one V2 GPU model runner,
 and one trace schema. The checked-in RTX 8000 run is lossless through EOS for
 every method.
 
-| Method | K | Median output tok/s | vs AR | committed/step |
-|---|---:|---:|---:|---:|
-| AR | 0 | 119.40 | 1.000× | 1.000 |
-| EAGLE3 | 7 | 104.20 | 0.873× | 2.558 |
-| DFlash | 7 | 167.74 | 1.405× | 3.429 |
-| DFlare | 7 | 172.61 | 1.446× | 3.600 |
-| DSpark | 7 | 204.78 | 1.715× | 3.847 |
+| Method | Runtime K | Checkpoint block | Median output tok/s | vs AR | committed/step | Draft acceptance |
+|---|---:|---:|---:|---:|---:|---:|
+| AR | 0 | — | 236.13 | 1.000× | 1.000 | — |
+| EAGLE3 | 7 | 7 | 225.18 | 0.954× | 2.558 | 24.48% |
+| DFlash | 7 | 7 | 393.58 | 1.667× | 3.429 | 38.43% |
+| DFlare | 7 | 16 (truncated) | 384.87 | 1.630× | 3.600 | 42.10% |
+| DSpark | 7 | 7 | 432.35 | 1.831× | 3.847 | 45.97% |
 
-This table is deliberately marked **provisional**: another process occupied
-25.6 GiB and 42–100% GPU utilization during the run. The machine-readable
-result sets `benchmark_claim=false`; use it to validate the comparison path,
-not as a headline speed claim. See the [stage report](reports/unified/stage-03-rtx8000-results.md)
+The previous DFlash row used a different z-lab block-16 checkpoint and
+accepted zero draft tokens, so its 68.66 tok/s result measured proposer
+overhead without speculative progress and did not satisfy the equal-`K`
+contract. The corrected row uses
+`deepseek-ai/dflash_qwen3_8b_block7@9e44dbbb6c`, accepts 382 of 994 proposed
+tokens, and reaches 393.58 tok/s in the isolated rerun. This checkpoint is
+packaged as a `Qwen3DSparkModel` with `markov_rank=0`, so it uses the compatible
+anchor sampling runtime while remaining labeled as the DFlash algorithm.
+
+DFlare also runs with `K=7`, but the available released checkpoint was trained
+with block 16. Its row therefore controls runtime verifier width by truncation;
+it is not a native block-7 training ablation. EAGLE3, DFlash, and DSpark use
+native block-7 checkpoints. All four speculative methods match AR token for
+token through the first EOS and are stable across the three measured rounds.
+
+This checked-in run passed the automatic isolation gate: every pre-method
+snapshot observed 0% utilization and only the 26 MiB CUDA MPS daemon, so the
+machine-readable result sets `benchmark_claim=true`. The numbers describe one
+fixed offline eager batch on this RTX 8000; they are not online-serving or RTX
+4090 claims. See the [stage report](reports/unified/stage-03-rtx8000-results.md)
 and [unified protocol](docs/11_unified_speculative_benchmark.md).
 
 For RTX 4090 validation, the one-command runner executes the full BF16 native

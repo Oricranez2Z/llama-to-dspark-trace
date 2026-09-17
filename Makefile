@@ -4,7 +4,7 @@ setup:
 	uv sync --extra dev
 
 test:
-	uv run pytest
+	uv run python -m pytest
 
 lint:
 	uv run ruff check .

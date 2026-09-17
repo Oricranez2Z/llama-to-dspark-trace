@@ -21,9 +21,11 @@ DFlash, DFlare, and DSpark protocol. Unlike the historical smokes below, it
 pins the same target, workload, precision, runner, process isolation, timing,
 trace, and correctness rules for every method.
 
-The runner records GPU state before every method. Any pre-existing utilization
-above 5% or external compute allocation above 512 MiB makes the result
-provisional and sets `benchmark_claim=false`.
+The runner records GPU state before every method. It briefly resamples high
+utilization when external allocation is small so the preceding worker's NVML
+tail is not mistaken for contention. Persistent utilization above 5% or
+external compute allocation above 512 MiB makes the result provisional and
+sets `benchmark_claim=false`.
 
 ## Historical GPU smoke tests
 

@@ -1,13 +1,15 @@
 {
   "schema_version": 1,
-  "benchmark_fingerprint": "11337a189057b2d4f52cc11f08af387c8447325d0f8d9655a44d1f061f6307cf",
+  "benchmark_fingerprint": "9da24855f55f160155da4778a4420323b7dbf3f951224a834bc30a23ec9f3e7d",
   "workload_sha256": "b00ebe2c336017df65181edbe83c6409b86b5c21a8170c97656bfbab4b5d03d7",
   "method": {
     "name": "dflare",
-    "label": "AngelSlim/Qwen3-8b-dflare",
+    "label": "AngelSlim/Qwen3-8b-dflare (b16 checkpoint, K=7)",
     "speculative_method": "dflare",
-    "num_speculative_tokens": 15,
-    "draft_revision": "55e2c8d86d76ce1e79fa3b8642c7f80091285a82"
+    "num_speculative_tokens": 7,
+    "draft_revision": "55e2c8d86d76ce1e79fa3b8642c7f80091285a82",
+    "checkpoint_block_size": 16,
+    "block_mode": "runtime_truncated"
   },
   "target": {
     "label": "Qwen/Qwen3-8B",
@@ -23,30 +25,76 @@
     "output_tokens_per_repetition": 512
   },
   "timing": {
-    "engine_init_seconds": 22.65151978842914,
+    "engine_init_seconds": 20.781587110832334,
     "warmup_rounds": 2,
     "repetitions": 3,
     "batch_seconds": [
-      3.179203238338232,
-      3.178953992202878,
-      3.178908606991172
+      1.328346997499466,
+      1.3303337451070547,
+      1.3324539214372635
     ],
-    "mean_batch_seconds": 3.179021945844094,
-    "median_batch_seconds": 3.178953992202878,
-    "min_batch_seconds": 3.178908606991172,
-    "max_batch_seconds": 3.179203238338232,
-    "median_output_tokens_per_second": 161.0592670594789
+    "mean_batch_seconds": 1.330378221347928,
+    "median_batch_seconds": 1.3303337451070547,
+    "min_batch_seconds": 1.328346997499466,
+    "max_batch_seconds": 1.3324539214372635,
+    "median_output_tokens_per_second": 384.86582925760354
   },
   "correctness": {
     "stable_across_repetitions": true,
     "traced_run_matches_timed_run": true
   },
   "scheduler": {
-    "nonempty_scheduler_steps": 31,
+    "nonempty_scheduler_steps": 29,
     "assumed_prefill_steps": 1,
-    "decode_steps": 30,
-    "mean_committed_tokens_per_decode_step": 2.1333333333333333,
-    "definition": "output tokens / (post-prefill scheduler steps * request count); all requests use ignore_eos and equal output length"
+    "decode_steps": 28,
+    "decode_request_steps": 140,
+    "mean_committed_tokens_per_decode_step": 3.6,
+    "definition": "post-prefill output tokens / active request decode steps; all requests use ignore_eos and equal output length",
+    "speculative_acceptance": {
+      "num_drafts": 132,
+      "num_draft_tokens": 924,
+      "num_accepted_tokens": 389,
+      "mean_acceptance_length_including_bonus": 3.946969696969697,
+      "draft_token_acceptance_rate": 0.420995670995671,
+      "accepted_draft_tokens_histogram": {
+        "7": 25,
+        "3": 24,
+        "6": 6,
+        "0": 29,
+        "2": 14,
+        "1": 21,
+        "5": 5,
+        "4": 8
+      },
+      "num_draft_tokens_per_position": [
+        132,
+        132,
+        132,
+        132,
+        132,
+        132,
+        132
+      ],
+      "num_accepted_tokens_per_position": [
+        103,
+        82,
+        68,
+        44,
+        36,
+        31,
+        25
+      ],
+      "per_position_acceptance_rate": [
+        0.7803030303030303,
+        0.6212121212121212,
+        0.5151515151515151,
+        0.3333333333333333,
+        0.2727272727272727,
+        0.23484848484848486,
+        0.1893939393939394
+      ],
+      "definition": "exact scheduler-reported accepted draft tokens; the conventional mean acceptance length adds one target bonus token"
+    }
   },
   "environment": {
     "gpu": "Quadro RTX 8000",
@@ -69,8 +117,8 @@
     "attention_backend_request": "auto"
   },
   "memory": {
-    "max_allocated_bytes_after_warmup": 21103508480,
-    "max_reserved_bytes_after_warmup": 21250441216
+    "max_allocated_bytes_after_warmup": 21050949632,
+    "max_reserved_bytes_after_warmup": 21179138048
   },
   "outputs": [
     {

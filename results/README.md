@@ -40,8 +40,8 @@ measured/vllm_dflare_patch_rtx8000_fp16_smoke/
 
 measured/unified_spec_qwen3_8b_rtx8000_fp16/
     Common vLLM V2 AR/EAGLE3/DFlash/DFlare/DSpark results. The summary records
-    both EOS-bounded and strict fixed-length equality plus pre-method GPU
-    contention snapshots.
+    a common runtime K=7, exact scheduler acceptance, both EOS-bounded and
+    strict fixed-length equality, and pre-method GPU contention snapshots.
 
 figures/vllm_scheduler_trace.svg
 figures/dspark_verification_rounds.svg
@@ -58,7 +58,8 @@ make compare-dflare
 make plot-unified
 ```
 
-The unified directory is a controlled measured comparison, but its checked-in
-RTX 8000 run detected a competing GPU workload and therefore records
-`benchmark_claim=false`. Earlier GPU directories are integration smokes and
-must not be presented as comparative speedups.
+The unified directory is a controlled measured comparison. Its checked-in RTX
+8000 rerun passed the pre-method isolation gate and records
+`benchmark_claim=true`; the claim is limited to its fixed offline eager batch.
+Earlier GPU directories are integration smokes and must not be presented as
+comparative speedups.

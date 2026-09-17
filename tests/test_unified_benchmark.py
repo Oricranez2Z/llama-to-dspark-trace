@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import json
+import time
 from pathlib import Path
 
 import pytest
 
+import experiments.run_unified_spec_benchmark as benchmark_runner
 from experiments.prepare_deepspec_checkpoint import (
     adapt_eagle3_config,
     prepare_checkpoint,
@@ -231,6 +233,32 @@ def test_deepspec_dflash_runtime_contract_checks_layout(tmp_path: Path) -> None:
     )
     with pytest.raises(ValueError, match="markov_rank=0"):
         _validate_draft_contract(method, tmp_path)
+
+
+def test_gpu_preflight_retries_transient_utilization(monkeypatch) -> None:
+    snapshots = iter(
+        [
+            {
+                "utilization_percent": 17,
+                "external_compute_memory_mib": 26,
+                "contention_detected": True,
+            },
+            {
+                "utilization_percent": 0,
+                "external_compute_memory_mib": 26,
+                "contention_detected": False,
+            },
+        ]
+    )
+    monkeypatch.setattr(
+        benchmark_runner, "_gpu_snapshot", lambda _index: next(snapshots)
+    )
+    monkeypatch.setattr(time, "sleep", lambda _seconds: None)
+
+    snapshot = benchmark_runner._gpu_snapshot_after_idle("0", attempts=2)
+
+    assert snapshot["contention_detected"] is False
+    assert snapshot["utilization_percent"] == 0
 
 
 def test_prepare_deepspec_eagle3_checkpoint_view(tmp_path: Path) -> None:

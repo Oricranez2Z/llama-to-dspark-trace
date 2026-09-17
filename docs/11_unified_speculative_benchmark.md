@@ -112,9 +112,9 @@ Before accepting a run, require:
 4. all repetitions are stable;
 5. no framework silently changes dtype or attention backend.
 
-Only an exclusive, contention-free 4090 run should be used for a headline
-performance claim. The checked-in RTX 8000 result is explicitly provisional
-because another process occupied the GPU throughout the measurement.
+The checked-in RTX 8000 rerun passed the contention gate and supports claims
+about that fixed offline eager workload. A separate contention-free 4090 run
+is still required for RTX 4090, BF16, FlashAttention, or serving claims.
 
 ## One-command RTX 4090 validation
 

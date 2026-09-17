@@ -8,6 +8,7 @@ import json
 import os
 import random
 import subprocess
+import time
 from pathlib import Path
 
 from llm_serving_lab.benchmark import (
@@ -127,6 +128,23 @@ def _gpu_snapshot(index: str) -> dict[str, object]:
     }
 
 
+def _gpu_snapshot_after_idle(
+    index: str, *, attempts: int = 15, interval_seconds: float = 1.0
+) -> dict[str, object]:
+    """Avoid treating the previous worker's utilization tail as contention."""
+    if attempts <= 0:
+        raise ValueError("attempts must be positive")
+    for attempt in range(attempts):
+        snapshot = _gpu_snapshot(index)
+        if not snapshot["contention_detected"]:
+            return snapshot
+        if int(snapshot["external_compute_memory_mib"]) > 512:
+            return snapshot
+        if attempt + 1 < attempts:
+            time.sleep(interval_seconds)
+    return snapshot
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--python", type=Path, required=True)
@@ -193,7 +211,7 @@ def main() -> None:
     results = []
     gpu_snapshots = {}
     for method_name in method_order:
-        gpu_snapshots[method_name] = _gpu_snapshot(args.gpu)
+        gpu_snapshots[method_name] = _gpu_snapshot_after_idle(args.gpu)
         method_output = output_dir / "methods" / method_name
         command = [
             str(python_executable),

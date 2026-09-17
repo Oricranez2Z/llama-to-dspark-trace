@@ -162,5 +162,6 @@ for statistics. No row is a production performance claim; read the exact
 revisions and limitations from each result manifest.
 
 The newer unified result additionally proves that all five methods execute in
-one vLLM V2 framework and match AR through EOS. Its speed measurements remain
-provisional because the automatic GPU preflight detected a competing process.
+one vLLM V2 framework and match AR through EOS. The 2026-09-17 rerun passed the
+automatic isolation gate; its rates still apply only to the fixed offline
+eager workload on that RTX 8000.

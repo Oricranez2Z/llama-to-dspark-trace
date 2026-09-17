@@ -49,14 +49,15 @@ the utility symlinks the original weights and leaves the snapshot unchanged.
 ```text
 vLLM changed-file Ruff checks: passed
 vLLM DFlare model tests: 3 passed
-main repository tests: 36 passed
+main repository tests: 37 passed
 five-method V2 smoke: passed; all methods lossless through EOS
 formal RTX 8000 run: all methods matched AR through EOS
 vLLM result commit: clean
 ```
 
-The RTX 8000 comparison is provisional because another process used the GPU.
-That limitation is stored in `summary.json`, not left as prose only.
+The 2026-09-17 RTX 8000 rerun passed its pre-method isolation gate. The
+validity status and raw GPU snapshots are stored in `summary.json`, not left as
+prose only.
 
 ## Scope
 

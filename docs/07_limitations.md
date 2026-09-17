@@ -14,10 +14,13 @@
   studied source revision. Internal APIs may change.
 - The unified runner is an offline fixed batch, not an online arrival process;
   it does not report TTFT/TPOT percentiles or scheduler behavior under load.
-- The checked-in RTX 8000 comparison ran beside another GPU process. Its
-  machine-readable validity gate marks all speedups provisional.
-- Proposal lengths are checkpoint-native (`K=7` or `K=15`), so the comparison
-  evaluates released method/checkpoint pairs rather than equal-K algorithms.
+- The checked-in RTX 8000 comparison passed its isolation gate, but covers one
+  fixed offline eager batch rather than online arrivals, CUDA graphs, or load
+  sweeps.
+- The primary checked-in comparison uses runtime `K=7` for every speculative
+  method. EAGLE3, DFlash, and DSpark use native block-7 checkpoints, while
+  DFlare truncates a released block-16 checkpoint to `K=7`; this is equal
+  verifier width, not a fully matched-training-block ablation.
 - CUDA graph, quantized, tensor-parallel, and multi-node paths are not covered.
 - The RTX 8000 uses compute capability 7.5 and Triton attention fallback;
   kernels and conclusions must be rebuilt and remeasured on the RTX 4090.

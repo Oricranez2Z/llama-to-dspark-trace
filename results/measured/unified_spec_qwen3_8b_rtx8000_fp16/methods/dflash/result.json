@@ -1,13 +1,15 @@
 {
   "schema_version": 1,
-  "benchmark_fingerprint": "11337a189057b2d4f52cc11f08af387c8447325d0f8d9655a44d1f061f6307cf",
+  "benchmark_fingerprint": "9da24855f55f160155da4778a4420323b7dbf3f951224a834bc30a23ec9f3e7d",
   "workload_sha256": "b00ebe2c336017df65181edbe83c6409b86b5c21a8170c97656bfbab4b5d03d7",
   "method": {
     "name": "dflash",
-    "label": "z-lab/Qwen3-8B-DFlash-b16",
-    "speculative_method": "dflash",
-    "num_speculative_tokens": 15,
-    "draft_revision": "9b41424b7109f9c5413454f481b09a82b85333f4"
+    "label": "deepseek-ai/dflash_qwen3_8b_block7",
+    "speculative_method": "dspark",
+    "num_speculative_tokens": 7,
+    "draft_revision": "9e44dbbb6cb68b0c943abf9c5fc3c17c00897cdf",
+    "checkpoint_block_size": 7,
+    "block_mode": "native"
   },
   "target": {
     "label": "Qwen/Qwen3-8B",
@@ -23,30 +25,76 @@
     "output_tokens_per_repetition": 512
   },
   "timing": {
-    "engine_init_seconds": 23.121983241289854,
+    "engine_init_seconds": 21.19109641201794,
     "warmup_rounds": 2,
     "repetitions": 3,
     "batch_seconds": [
-      7.46275114826858,
-      7.456740455701947,
-      7.447766931727529
+      1.3008760008960962,
+      1.3008607421070337,
+      1.3022025767713785
     ],
-    "mean_batch_seconds": 7.455752845232685,
-    "median_batch_seconds": 7.456740455701947,
-    "min_batch_seconds": 7.447766931727529,
-    "max_batch_seconds": 7.46275114826858,
-    "median_output_tokens_per_second": 68.66270900021588
+    "mean_batch_seconds": 1.301313106591503,
+    "median_batch_seconds": 1.3008760008960962,
+    "min_batch_seconds": 1.3008607421070337,
+    "max_batch_seconds": 1.3022025767713785,
+    "median_output_tokens_per_second": 393.5809405718251
   },
   "correctness": {
     "stable_across_repetitions": true,
     "traced_run_matches_timed_run": true
   },
   "scheduler": {
-    "nonempty_scheduler_steps": 64,
+    "nonempty_scheduler_steps": 31,
     "assumed_prefill_steps": 1,
-    "decode_steps": 63,
-    "mean_committed_tokens_per_decode_step": 1.0158730158730158,
-    "definition": "output tokens / (post-prefill scheduler steps * request count); all requests use ignore_eos and equal output length"
+    "decode_steps": 30,
+    "decode_request_steps": 147,
+    "mean_committed_tokens_per_decode_step": 3.4285714285714284,
+    "definition": "post-prefill output tokens / active request decode steps; all requests use ignore_eos and equal output length",
+    "speculative_acceptance": {
+      "num_drafts": 142,
+      "num_draft_tokens": 994,
+      "num_accepted_tokens": 382,
+      "mean_acceptance_length_including_bonus": 3.6901408450704225,
+      "draft_token_acceptance_rate": 0.3843058350100604,
+      "accepted_draft_tokens_histogram": {
+        "3": 18,
+        "2": 26,
+        "7": 21,
+        "0": 32,
+        "5": 7,
+        "4": 12,
+        "1": 22,
+        "6": 4
+      },
+      "num_draft_tokens_per_position": [
+        142,
+        142,
+        142,
+        142,
+        142,
+        142,
+        142
+      ],
+      "num_accepted_tokens_per_position": [
+        110,
+        88,
+        62,
+        44,
+        32,
+        25,
+        21
+      ],
+      "per_position_acceptance_rate": [
+        0.7746478873239436,
+        0.6197183098591549,
+        0.43661971830985913,
+        0.30985915492957744,
+        0.22535211267605634,
+        0.176056338028169,
+        0.14788732394366197
+      ],
+      "definition": "exact scheduler-reported accepted draft tokens; the conventional mean acceptance length adds one target bonus token"
+    }
   },
   "environment": {
     "gpu": "Quadro RTX 8000",
@@ -69,8 +117,8 @@
     "attention_backend_request": "auto"
   },
   "memory": {
-    "max_allocated_bytes_after_warmup": 21839111168,
-    "max_reserved_bytes_after_warmup": 21925724160
+    "max_allocated_bytes_after_warmup": 21771642368,
+    "max_reserved_bytes_after_warmup": 21858615296
   },
   "outputs": [
     {
@@ -123,13 +171,10 @@
         151645,
         271,
         334,
-        33092,
-        291,
-        323,
-        63594,
-        2319,
-        25,
-        56177,
+        19357,
+        21806,
+        66963,
+        2303,
         82707,
         47430,
         14177,
@@ -140,10 +185,13 @@
         47116,
         553,
         27572,
-        8597
+        8597,
+        24182,
+        1376,
+        19083
       ],
       "output_tokens": 64,
-      "text": "KV caching accelerates autoregressive decoding by storing previously computed key-value pairs, eliminating redundant computations during sequence generation. This reduces the computational load at each step, allowing for faster and more efficient decoding of long sequences.\n\n**Corrected and concise version:**\n\nKV caching accelerates autoregressive decoding by storing previously"
+      "text": "KV caching accelerates autoregressive decoding by storing previously computed key-value pairs, eliminating redundant computations during sequence generation. This reduces the computational load at each step, allowing for faster and more efficient decoding of long sequences.\n\n**Final Answer:**  \nKV caching accelerates autoregressive decoding by storing previously computed key-value"
     },
     {
       "id": "systems-batching",

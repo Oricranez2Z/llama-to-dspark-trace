@@ -3,25 +3,25 @@
 <text x="40" y="42" font-family="sans-serif" font-size="24" font-weight="700" fill="#0f172a">Qwen/Qwen3-8B unified vLLM benchmark</text>
 <text x="40" y="70" font-family="sans-serif" font-size="14" fill="#475569">Quadro RTX 8000; median of controlled offline batches</text>
 <text x="40" y="96" font-family="sans-serif" font-size="13" fill="#64748b">Bar: speedup vs AR · detail: output tok/s and committed tokens/step</text>
-<text x="40" y="118" font-family="sans-serif" font-size="13" font-weight="700" fill="#b45309">PROVISIONAL: another process occupied the GPU during measurement</text>
+<text x="40" y="118" font-family="sans-serif" font-size="13" font-weight="700" fill="#047857">VALID: no pre-method GPU contention detected</text>
 <text x="40" y="165" font-family="sans-serif" font-size="17" font-weight="700" fill="#0f172a">AR</text>
-<rect x="190" y="140" width="341.7" height="34" rx="6" fill="#64748b"/>
-<text x="541.7" y="163" font-family="monospace" font-size="15" fill="#0f172a">1.00x</text>
-<text x="190" y="197" font-family="sans-serif" font-size="13" fill="#475569">122.74 tok/s · 1.02 committed/step · K=0 · lossless-to-EOS</text>
+<rect x="190" y="140" width="311.3" height="34" rx="6" fill="#64748b"/>
+<text x="511.3" y="163" font-family="monospace" font-size="15" fill="#0f172a">1.00x</text>
+<text x="190" y="197" font-family="sans-serif" font-size="13" fill="#475569">236.13 tok/s · 1.00 committed/step · K=0 · lossless-to-EOS</text>
 <text x="40" y="259" font-family="sans-serif" font-size="17" font-weight="700" fill="#0f172a">EAGLE3</text>
-<rect x="190" y="234" width="371.2" height="34" rx="6" fill="#8b5cf6"/>
-<text x="571.2" y="257" font-family="monospace" font-size="15" fill="#0f172a">1.09x</text>
-<text x="190" y="291" font-family="sans-serif" font-size="13" fill="#475569">133.35 tok/s · 1.73 committed/step · K=7 · lossless-to-EOS; post-EOS differs</text>
+<rect x="190" y="234" width="296.9" height="34" rx="6" fill="#8b5cf6"/>
+<text x="496.9" y="257" font-family="monospace" font-size="15" fill="#0f172a">0.95x</text>
+<text x="190" y="291" font-family="sans-serif" font-size="13" fill="#475569">225.18 tok/s · 2.56 committed/step · K=7 · lossless-to-EOS</text>
 <text x="40" y="353" font-family="sans-serif" font-size="17" font-weight="700" fill="#0f172a">DFLASH</text>
-<rect x="190" y="328" width="191.1" height="34" rx="6" fill="#f59e0b"/>
-<text x="391.1" y="351" font-family="monospace" font-size="15" fill="#0f172a">0.56x</text>
-<text x="190" y="385" font-family="sans-serif" font-size="13" fill="#475569">68.66 tok/s · 1.02 committed/step · K=15 · lossless-to-EOS</text>
+<rect x="190" y="328" width="518.9" height="34" rx="6" fill="#f59e0b"/>
+<text x="718.9" y="351" font-family="monospace" font-size="15" fill="#0f172a">1.67x</text>
+<text x="190" y="385" font-family="sans-serif" font-size="13" fill="#475569">393.58 tok/s · 3.43 committed/step · K=7 · lossless-to-EOS; post-EOS differs</text>
 <text x="40" y="447" font-family="sans-serif" font-size="17" font-weight="700" fill="#0f172a">DFLARE</text>
-<rect x="190" y="422" width="448.4" height="34" rx="6" fill="#2563eb"/>
-<text x="648.4" y="445" font-family="monospace" font-size="15" fill="#0f172a">1.31x</text>
-<text x="190" y="479" font-family="sans-serif" font-size="13" fill="#475569">161.06 tok/s · 2.13 committed/step · K=15 · lossless-to-EOS</text>
+<rect x="190" y="422" width="507.4" height="34" rx="6" fill="#2563eb"/>
+<text x="707.4" y="445" font-family="monospace" font-size="15" fill="#0f172a">1.63x</text>
+<text x="190" y="479" font-family="sans-serif" font-size="13" fill="#475569">384.87 tok/s · 3.60 committed/step · K=7 · lossless-to-EOS</text>
 <text x="40" y="541" font-family="sans-serif" font-size="17" font-weight="700" fill="#0f172a">DSPARK</text>
 <rect x="190" y="516" width="570.0" height="34" rx="6" fill="#10b981"/>
-<text x="770.0" y="539" font-family="monospace" font-size="15" fill="#0f172a">1.67x</text>
-<text x="190" y="573" font-family="sans-serif" font-size="13" fill="#475569">204.76 tok/s · 2.56 committed/step · K=7 · lossless-to-EOS; post-EOS differs</text>
+<text x="770.0" y="539" font-family="monospace" font-size="15" fill="#0f172a">1.83x</text>
+<text x="190" y="573" font-family="sans-serif" font-size="13" fill="#475569">432.35 tok/s · 3.85 committed/step · K=7 · lossless-to-EOS; post-EOS differs</text>
 </svg>
